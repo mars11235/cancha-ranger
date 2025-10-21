@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>Cancha Ranger - Sistema de Reservas Profesional</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="responsive.css">
+</head>
+<body>
+    <!-- Header Profesional -->
+    <header class="header-profesional">
+        <nav class="nav-profesional">
+            <div class="nav-container">
+                <div class="logo-profesional">
+                    <div class="logo-icon">
+                        <i class="fas fa-futbol"></i>
+                    </div>
+                    <div class="logo-text">
+                        <h1>CANCHA RANGER</h1>
+                        <span>Sistema de Reservas</span>
+                    </div>
+                </div>
+                <ul class="nav-menu">
+                    <li><a href="#inicio" class="nav-link active"><i class="fas fa-home"></i> INICIO</a></li>
+                    <li><a href="#informacion" class="nav-link"><i class="fas fa-info-circle"></i> INFORMACIÓN</a></li>
+                    <li><a href="#canchas" class="nav-link"><i class="fas fa-map-marker-alt"></i> CANCHAS</a></li>
+                    <li><a href="#reservas" class="nav-link btn-reserva-nav"><i class="fas fa-calendar-plus"></i> RESERVAR</a></li>
+                    <li><a href="#areaUsuario" class="nav-link" id="linkAreaUsuario" style="display: none;"><i class="fas fa-user"></i> MI CUENTA</a></li>
+                </ul>
+                <div class="nav-actions">
+                    <button class="btn-login" id="btnLogin">
+                        <i class="fas fa-user"></i>
+                        <span id="loginText">Mi Cuenta</span>
+                    </button>
+                    <button class="btn-logout" id="btnLogout" style="display: none;">
+                        <i class="fas fa-sign-out-alt"></i>
+                        Cerrar Sesión
+                    </button>
+                </div>
+                <div class="hamburger">
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Modal Login -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Iniciar Sesión</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="login-form">
+                    <div class="form-group">
+                        <label for="loginEmail"><i class="fas fa-envelope"></i> Correo Electrónico</label>
+                        <input type="email" id="loginEmail" placeholder="tu@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="loginPassword"><i class="fas fa-lock"></i> Contraseña</label>
+                        <input type="password" id="loginPassword" placeholder="••••••••">
+                    </div>
+                    <button class="btn btn-primary btn-block" id="btnIniciarSesion">
+                        <i class="fas fa-sign-in-alt"></i>
+                        Ingresar
+                    </button>
+                    <div class="login-links">
+                        <a href="#" class="link" id="linkOlvidePassword">¿Olvidaste tu contraseña?</a>
+                        <a href="#" class="link" id="linkCrearCuenta">Crear cuenta nueva</a>
+                    </div>
+                </div>
+                
+                <div class="register-form" style="display: none;">
+                    <div class="form-group">
+                        <label for="regNombre"><i class="fas fa-user"></i> Nombre Completo</label>
+                        <input type="text" id="regNombre" placeholder="Juan Pérez">
+                    </div>
+                    <div class="form-group">
+                        <label for="regEmail"><i class="fas fa-envelope"></i> Correo Electrónico</label>
+                        <input type="email" id="regEmail" placeholder="tu@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="regPhone"><i class="fas fa-phone"></i> Teléfono</label>
+                        <input type="tel" id="regPhone" placeholder="73811600">
+                    </div>
+                    <div class="form-group">
+                        <label for="regPassword"><i class="fas fa-lock"></i> Contraseña</label>
+                        <input type="password" id="regPassword" placeholder="••••••••">
+                    </div>
+                    <button class="btn btn-primary btn-block" id="btnRegistrarUsuario">
+                        <i class="fas fa-user-plus"></i>
+                        Crear Cuenta
+                    </button>
+                    <div class="login-links">
+                        <a href="#" class="link" id="linkVolverLogin">Volver al login</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Detalles Cancha -->
+    <div id="detallesModal" class="modal">
+        <div class="modal-content modal-detalles">
+            <div class="modal-header">
+                <h3><i class="fas fa-info-circle"></i> Detalles de la Cancha</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body" id="detallesCanchaBody">
+                <!-- Contenido dinámico -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Sección Hero Profesional -->
+    <section id="inicio" class="hero-profesional">
+        <div class="hero-overlay"></div>
+        <div class="container">
+            <div class="hero-content">
+                <div class="hero-badge">
+                    
+                </div>
+                <h1 class="hero-title">
+                    Reserva tu Cancha en 
+                    <span class="text-acento">Tiempo Real</span>
+                </h1>
+                <p class="hero-description">
+                    Sistema profesional de reservas con confirmación inmediata, 
+                    calendario interactivo y notificaciones automáticas. 
+                    Disfruta del deporte sin complicaciones.
+                </p>
+                <div class="hero-features">
+                    <div class="feature">
+                        <i class="fas fa-sync-alt"></i>
+                        <span>Disponibilidad en Tiempo Real</span>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-envelope"></i>
+                        <span>Confirmación por Email</span>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-mobile-alt"></i>
+                        <span>Gestión desde tu Celular</span>
+                    </div>
+                </div>
+                <div class="hero-actions">
+                    <a href="#canchas" class="btn btn-primary btn-large">
+                        <i class="fas fa-search"></i>
+                        Ver Canchas Disponibles
+                    </a>
+                    <a href="#reservas" class="btn btn-secondary btn-large">
+                        <i class="fas fa-calendar-check"></i>
+                        Reservar Ahora
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección Información -->
+    <section id="informacion" class="info-profesional">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Información del Establecimiento</h2>
+                <p class="section-subtitle">Todo lo que necesitas saber para tu experiencia perfecta</p>
+            </div>
+            <div class="info-grid-profesional">
+                <div class="info-card-profesional">
+                    <div class="info-icon">
+                        <i class="fas fa-map-marked-alt"></i>
+                    </div>
+                    <h3>Ubicación Estratégica</h3>
+                    <p>Calle 9 de abril entre Ejercito y Murillo Dorado</p>
+                    <div class="info-meta">
+                        <i class="fas fa-car"></i>
+                        Amplio estacionamiento
+                    </div>
+                </div>
+                
+                <div class="info-card-profesional">
+                    <div class="info-icon">
+                        <i class="fas fa-phone-volume"></i>
+                    </div>
+                    <h3>Soporte Inmediato</h3>
+                    <p><strong>73811600</strong><br><strong>73220922</strong></p>
+                    <div class="info-meta">
+                        <i class="fas fa-comment-dots"></i>
+                        WhatsApp disponible
+                    </div>
+                </div>
+                
+                <div class="info-card-profesional">
+                    <div class="info-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <h3>Horario Extendido</h3>
+                    <p><strong>2:00 PM - 10:00 PM</strong><br>Martes a Domingo</p>
+                    <div class="info-meta">
+                        <i class="fas fa-calendar-check"></i>
+                        Reservas online 24/7
+                    </div>
+                </div>
+                
+                <div class="info-card-profesional">
+                    <div class="info-icon">
+                        <i class="fas fa-user-tie"></i>
+                    </div>
+                    <h3>Atención Personalizada</h3>
+                    <p><strong>Lurdes Córdova</strong><br>Operadora Especializada</p>
+                    <div class="info-meta">
+                        <i class="fas fa-headset"></i>
+                        Soporte profesional
+                    </div>
+                </div>
+            </div>
+
+            <!-- Políticas de Cancelación -->
+            <div class="politicas-section">
+                <h3>📝 Políticas de Reserva</h3>
+                <div class="politicas-grid">
+                    <div class="politica-card">
+                        <i class="fas fa-edit"></i>
+                        <h4>Modificaciones</h4>
+                        <p>Puedes modificar tu reserva hasta 12 horas antes del horario programado</p>
+                    </div>
+                    <div class="politica-card">
+                        <i class="fas fa-times-circle"></i>
+                        <h4>Cancelaciones</h4>
+                        <p>Cancelación sin costo hasta 12 horas antes. Después de ese tiempo no hay reembolso</p>
+                    </div>
+                    <div class="politica-card">
+                        <i class="fas fa-envelope"></i>
+                        <h4>Confirmaciones</h4>
+                        <p>Recibirás email de confirmación inmediato con todos los detalles de tu reserva</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección Canchas -->
+    <section id="canchas" class="canchas-profesional">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Nuestras Canchas Disponibles</h2>
+                <p class="section-subtitle">Selecciona la cancha perfecta para tu partido</p>
+            </div>
+            
+            <div class="canchas-grid-profesional" id="canchasGrid">
+                <!-- Las canchas se cargan dinámicamente con JavaScript -->
+            </div>
+
+            <!-- Estado en Tiempo Real -->
+            <div class="estado-tiempo-real">
+                <div class="estado-header">
+                    <i class="fas fa-sync-alt"></i>
+                    <h3>Disponibilidad en Tiempo Real</h3>
+                    <span class="estado-indicador" id="estadoIndicador">
+                        <i class="fas fa-circle"></i>
+                        Actualizado ahora
+                    </span>
+                </div>
+                <div class="estado-cancha" id="estadoCanchas">
+                    <!-- Estado de cada cancha se actualiza en tiempo real -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección Sistema de Reservas -->
+    <section id="reservas" class="reservas-profesional">
+        <div class="container">
+            <div class="reserva-container-profesional">
+                <!-- Panel Lateral -->
+                <div class="reserva-sidebar">
+                    <div class="sidebar-header">
+                        <h3><i class="fas fa-list-alt"></i> Selecciona Cancha</h3>
+                        <div class="filtro-horario">
+                            <label>Mostrar horarios de:</label>
+                            <select id="filtroHorario">
+                                <option value="today">Hoy</option>
+                                <option value="tomorrow">Mañana</option>
+                                <option value="week">Esta semana</option>
+                                <option value="all">Todos</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="canchas-lista-profesional" id="canchasLista">
+                        <!-- Lista de canchas para selección -->
+                    </div>
+
+                    <!-- Información de Reservas -->
+                    <div class="info-reserva-sidebar">
+                        <h4><i class="fas fa-info-circle"></i> Información Importante</h4>
+                        <ul>
+                            <li><i class="fas fa-clock"></i> <strong>Horario:</strong> 2:00 PM - 10:00 PM</li>
+                            <li><i class="fas fa-stopwatch"></i> <strong>Reserva mínima:</strong> 1 hora</li>
+                            <li><i class="fas fa-edit"></i> <strong>Modificaciones:</strong> Hasta 12h antes</li>
+                            <li><i class="fas fa-money-bill-wave"></i> <strong>Pago:</strong> Efectivo en cancha</li>
+                        </ul>
+                    </div>
+
+                    <!-- Historial Rápido -->
+                    <div class="historial-rapido" id="historialRapido" style="display: none;">
+                        <h4><i class="fas fa-history"></i> Tus Reservas Recientes</h4>
+                        <div class="historial-lista" id="historialLista">
+                            <!-- Historial del usuario -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Panel Principal de Reservas -->
+                <div class="reserva-main">
+                    <div class="reserva-header">
+                        <h3><i class="fas fa-calendar-alt"></i> Sistema de Reservas</h3>
+                        <p>Selecciona cancha, fecha y horario para tu partido</p>
+                        <div class="reserva-progress">
+                            <div class="progress-step active" data-step="1">
+                                <span>1</span>
+                                Cancha
+                            </div>
+                            <div class="progress-step" data-step="2">
+                                <span>2</span>
+                                Fecha
+                            </div>
+                            <div class="progress-step" data-step="3">
+                                <span>3</span>
+                                Horario
+                            </div>
+                            <div class="progress-step" data-step="4">
+                                <span>4</span>
+                                Confirmar
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Calendario Interactivo -->
+                    <div class="calendario-profesional">
+                        <div class="calendario-header">
+                            <button id="prev-mes" class="btn-calendario" title="Mes anterior">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <h4 id="mes-actual">Octubre 2025</h4>
+                            <button id="next-mes" class="btn-calendario" title="Mes siguiente">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="dias-semana-profesional">
+                            <div>Lun</div>
+                            <div>Mar</div>
+                            <div>Mié</div>
+                            <div>Jue</div>
+                            <div>Vie</div>
+                            <div>Sáb</div>
+                            <div>Dom</div>
+                        </div>
+                        
+                        <div class="dias-mes-profesional" id="diasMes">
+                            <!-- Días generados dinámicamente -->
+                        </div>
+                    </div>
+                    
+                    <!-- Selector de Horarios -->
+                    <div class="horarios-profesional">
+                        <div class="horarios-header">
+                            <h4><i class="fas fa-clock"></i> Horarios Disponibles (2:00 PM - 10:00 PM)</h4>
+                            <div class="horario-info">
+                                <span class="hora-seleccion-info" id="horaSeleccionInfo">
+                                    Selecciona rango de horas
+                                </span>
+                            </div>
+                        </div>
+                        <div class="horarios-grid-profesional" id="horariosGrid">
+                            <!-- Horarios generados dinámicamente -->
+                        </div>
+                        <div class="horarios-leyenda">
+                            <div class="leyenda-item">
+                                <span class="indicador disponible"></span>
+                                Disponible
+                            </div>
+                            <div class="leyenda-item">
+                                <span class="indicador seleccionado"></span>
+                                Seleccionado
+                            </div>
+                            <div class="leyenda-item">
+                                <span class="indicador ocupado"></span>
+                                Ocupado
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Resumen de Reserva -->
+                    <div class="resumen-reserva-profesional">
+                        <div class="resumen-header">
+                            <h4><i class="fas fa-receipt"></i> Resumen de Reserva</h4>
+                            <div class="resumen-estado" id="resumenEstado">
+                                <i class="fas fa-info-circle"></i>
+                                Completa los pasos para ver el resumen
+                            </div>
+                        </div>
+                        <div class="resumen-detalles" id="resumenDetalles">
+                            <!-- Detalles de la reserva -->
+                        </div>
+                    </div>
+                    
+                    <!-- Formulario de Reserva -->
+                    <div class="formulario-reserva-profesional" id="formularioReserva">
+                        <!-- Formulario dinámico -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección Área de Usuario -->
+    <section id="areaUsuario" class="area-usuario-profesional" style="display: none;">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Mi Área Personal</h2>
+                <p class="section-subtitle">Gestiona tus reservas y información personal</p>
+            </div>
+            <div id="areaUsuarioContenido">
+                <!-- Contenido dinámico del área de usuario -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer Profesional -->
+    <footer class="footer-profesional">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <div class="logo-profesional footer-logo">
+                        <div class="logo-icon">
+                            <i class="fas fa-futbol"></i>
+                        </div>
+                        <div class="logo-text">
+                            <h2>CANCHA RANGER</h2>
+                            <span>Sistema Profesional</span>
+                        </div>
+                    </div>
+                    <p class="footer-desc">
+                        Sistema de reservas en tiempo real con confirmación inmediata 
+                        y gestión profesional de canchas deportivas.
+                    </p>
+                    <div class="sistema-stats">
+                        <div class="stat">
+                            <strong id="totalReservasHoy">0</strong>
+                            <span>Reservas Hoy</span>
+                        </div>
+                        <div class="stat">
+                            <strong id="canchasDisponibles">4</strong>
+                            <span>Canchas Activas</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="footer-contact">
+                    <h3>Contacto Directo</h3>
+                    <div class="contact-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <div>
+                            <strong>Ubicación</strong>
+                            <span>Calle 9 de abril entre Ejercito y Murillo Dorado</span>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-phone"></i>
+                        <div>
+                            <strong>Teléfonos</strong>
+                            <span>73811600 - 73220922</span>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-user-tie"></i>
+                        <div>
+                            <strong>Operadora</strong>
+                            <span>Lurdes Córdova</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="footer-hours">
+                    <h3>Horario de Operación</h3>
+                    <div class="hours-item">
+                        <i class="fas fa-clock"></i>
+                        <div>
+                            <strong>2:00 PM - 10:00 PM</strong>
+                            <p>Martes a Domingo</p>
+                        </div>
+                    </div>
+                    <div class="sistema-info">
+                        <i class="fas fa-laptop-code"></i>
+                        <span>Sistema online 24/7</span>
+                    </div>
+                </div>
+
+                <div class="footer-soporte">
+                    <h3>Soporte del Sistema</h3>
+                    <div class="soporte-item">
+                        <i class="fas fa-envelope"></i>
+                        <span>Confirmación automática por email</span>
+                    </div>
+                    <div class="soporte-item">
+                        <i class="fas fa-sync-alt"></i>
+                        <span>Actualización en tiempo real</span>
+                    </div>
+                    <div class="soporte-item">
+                        <i class="fas fa-mobile-alt"></i>
+                        <span>Compatible con móviles</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <div class="footer-copyright">
+                    <p>&copy; 2025 Cancha Ranger - Sistema Profesional de Reservas. Todos los derechos reservados.</p>
+                </div>
+                <div class="footer-links">
+                    <a href="#" id="linkPoliticaPrivacidad"><i class="fas fa-shield-alt"></i> Política de Privacidad</a>
+                    <a href="#" id="linkTerminosServicio"><i class="fas fa-file-contract"></i> Términos de Servicio</a>
+                    <a href="#" id="linkPanelAdmin"><i class="fas fa-cog"></i> Panel Admin</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modal Administrador -->
+    <div id="adminModal" class="modal">
+        <div class="modal-content modal-admin">
+            <div class="modal-header">
+                <h3><i class="fas fa-cog"></i> Panel de Administración</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="admin-stats">
+                    <div class="admin-stat">
+                        <h4>Reservas Hoy</h4>
+                        <span class="stat-number" id="adminReservasHoy">0</span>
+                    </div>
+                    <div class="admin-stat">
+                        <h4>Ingresos Hoy</h4>
+                        <span class="stat-number" id="adminIngresosHoy">0 Bs</span>
+                    </div>
+                    <div class="admin-stat">
+                        <h4>Total Reservas</h4>
+                        <span class="stat-number" id="adminTotalReservas">0</span>
+                    </div>
+                    <div class="admin-stat">
+                        <h4>Ingresos Totales</h4>
+                        <span class="stat-number" id="adminIngresosTotales">0 Bs</span>
+                    </div>
+                </div>
+                
+                <div class="admin-actions">
+                    <h4>Acciones Rápidas</h4>
+                    <div class="admin-buttons">
+                        <button class="btn btn-primary btn-small" id="btnVerTodasReservas">
+                            <i class="fas fa-list"></i> Ver Todas las Reservas
+                        </button>
+                        <button class="btn btn-secondary btn-small" id="btnLimpiarReservas">
+                            <i class="fas fa-trash"></i> Limpiar Reservas Antiguas
+                        </button>
+                        <button class="btn btn-secondary btn-small" id="btnExportarDatos">
+                            <i class="fas fa-download"></i> Exportar Datos
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="admin-notificaciones">
+                    <h4>Últimas Reservas</h4>
+                    <div class="notificaciones-list" id="adminNotificaciones">
+                        <!-- Notificaciones de reservas -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Detalles Reserva -->
+    <div id="detallesReservaModal" class="modal">
+        <div class="modal-content modal-detalles">
+            <div class="modal-header">
+                <h3><i class="fas fa-receipt"></i> Detalles de Reserva</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body" id="detallesReservaBody">
+                <!-- Contenido dinámico -->
+            </div>
+        </div>
+    </div>
+
+    <script src="email-service.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
