@@ -22,7 +22,7 @@ class SistemaCanchaRanger {
                 tipo: "Voleibol",
                 precio: this.config.precioWally,
                 imagen: "cancha1.jpg",
-                descripcion: "Cancha profesional de voleibol con medidas oficiales y superficie de alta calidad.",
+                descripcion: "Cancha profesional de voleibol con medidas oficiales.",
                 caracteristicas: [],
                 estado: "disponible",
                 capacidad: "6v6"
@@ -33,7 +33,7 @@ class SistemaCanchaRanger {
                 tipo: "Voleibol",
                 precio: this.config.precioWally,
                 imagen: "cancha2.jpg",
-                descripcion: "Cancha de voleibol con iluminación profesional y sistema de drenaje avanzado.",
+                descripcion: "Cancha de voleibol con iluminación profesional.",
                 caracteristicas: [],
                 estado: "disponible",
                 capacidad: "6v6"
@@ -44,7 +44,7 @@ class SistemaCanchaRanger {
                 tipo: "Voleibol",
                 precio: this.config.precioWally,
                 imagen: "cancha3.jpg",
-                descripcion: "Cancha competitiva de voleibol ideal para torneos y partidos de alta intensidad.",
+                descripcion: "Cancha competitiva de voleibol ideal para torneos y partidos.",
                 caracteristicas: [],
                 estado: "disponible",
                 capacidad: "6v6"
