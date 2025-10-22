@@ -50,6 +50,18 @@ class SistemaCanchaRanger {
                 capacidad: "6v6"
             },
             
+              {
+                id: 3,
+                nombre: "Cancha 4 Futsal",
+                tipo: "Futsal",
+                precio: this.config.precioFutsal,
+                imagen: "futsal.jpg",
+                descripcion: "Cancha sintetica de futsal ideal para torneos.",
+                caracteristicas: [],
+                estado: "disponible",
+                capacidad: "10v10"
+            },
+
         ];
 
         this.state = {
