@@ -12,9 +12,12 @@ class SistemaCanchaRanger {
             adminCredentials: {
                 usuario: 'admin',
                 password: 'CanchaRanger2025!'
-            }
+            },
+            // AGREGAR CONFIGURACIÓN DE WHATSAPP
+            whatsappAdmin: '59173811600' // Reemplaza con tu número en formato internacional
         };
 
+        // CORREGIR: IDs duplicados en canchas
         this.canchas = [
             {
                 id: 1,
@@ -49,9 +52,8 @@ class SistemaCanchaRanger {
                 estado: "disponible",
                 capacidad: "6v6"
             },
-            
-              {
-                id: 3,
+            {
+                id: 4, // CORREGIR: Cambiar de 3 a 4
                 nombre: "Cancha 4 Futsal",
                 tipo: "Futsal",
                 precio: this.config.precioFutsal,
@@ -61,7 +63,6 @@ class SistemaCanchaRanger {
                 estado: "disponible",
                 capacidad: "10v10"
             },
-
         ];
 
         this.state = {
@@ -314,6 +315,20 @@ class SistemaCanchaRanger {
             const horaElemento = document.querySelector(`.hora-slot[data-hora="${hora}"]`);
             if (horaElemento) horaElemento.classList.add('seleccionado');
         } else if (!this.state.horaFinSeleccionada && hora > this.state.horaInicioSeleccionada) {
+            
+            // MEJORADO: Verificar que todo el rango esté disponible
+            const disponible = this.verificarDisponibilidadRangoCompleto(
+                this.state.fechaSeleccionada,
+                this.state.canchaSeleccionada.id,
+                this.state.horaInicioSeleccionada,
+                hora
+            );
+            
+            if (!disponible) {
+                this.mostrarNotificacion('Algunas horas en este rango ya están ocupadas', 'error');
+                return;
+            }
+            
             this.state.horaFinSeleccionada = hora;
             
             // Seleccionar todas las horas entre inicio y fin
@@ -367,6 +382,9 @@ class SistemaCanchaRanger {
             await this.emailService.enviarConfirmacionUsuario(reserva, cancha);
             await this.emailService.enviarNotificacionAdmin(reserva, cancha);
 
+            // NUEVO: Enviar WhatsApp al administrador
+            this.enviarWhatsAppReserva(reserva);
+
             // Notificaciones
             this.mostrarConfirmacionReserva(reserva);
 
@@ -419,6 +437,105 @@ class SistemaCanchaRanger {
         }
     }
 
+    // ===== NUEVAS FUNCIONES PARA WHATSAPP =====
+    
+    // Enviar WhatsApp de nueva reserva
+    enviarWhatsAppReserva(reserva) {
+        const cancha = this.canchas.find(c => c.id === reserva.canchaId);
+        const horas = reserva.horaFin - reserva.horaInicio;
+        
+        // Número de teléfono donde quieres recibir las notificaciones
+        const telefonoAdmin = this.config.whatsappAdmin;
+        
+        // Mensaje detallado de la reserva
+        const mensaje = `📅 *NUEVA RESERVA - CANCHA RANGER* 📅
+
+🏟️ *Cancha:* ${cancha.nombre}
+👤 *Cliente:* ${reserva.usuario.nombre}
+📞 *Teléfono:* ${reserva.usuario.telefono}
+📧 *Email:* ${reserva.usuario.email}
+
+📆 *Fecha:* ${this.formatearFechaLegible(reserva.fecha)}
+⏰ *Horario:* ${reserva.horaInicio}:00 - ${reserva.horaFin}:00
+⏱️ *Duración:* ${horas} hora${horas > 1 ? 's' : ''}
+💰 *Total:* ${reserva.total} Bs
+
+🔢 *Código de Reserva:* ${reserva.codigoReserva}
+🆔 *ID Reserva:* ${reserva.id}
+
+⏰ *Reserva realizada:* ${new Date(reserva.timestamp).toLocaleString('es-ES')}
+
+_Reserva confirmada automáticamente por el sistema_`;
+
+        // Codificar el mensaje para URL
+        const mensajeCodificado = encodeURIComponent(mensaje);
+        
+        // Crear URL de WhatsApp
+        const urlWhatsApp = `https://wa.me/${telefonoAdmin}?text=${mensajeCodificado}`;
+        
+        // Abrir en nueva pestaña
+        window.open(urlWhatsApp, '_blank');
+        
+        console.log('📱 WhatsApp preparado para:', telefonoAdmin);
+    }
+
+    // Enviar WhatsApp de cancelación
+    enviarWhatsAppCancelacion(reserva) {
+        const cancha = this.canchas.find(c => c.id === reserva.canchaId);
+        const telefonoAdmin = this.config.whatsappAdmin;
+        
+        const mensaje = `❌ *CANCELACIÓN DE RESERVA - CANCHA RANGER* ❌
+
+🏟️ *Cancha:* ${cancha.nombre}
+👤 *Cliente:* ${reserva.usuario.nombre}
+📞 *Teléfono:* ${reserva.usuario.telefono}
+
+📆 *Fecha:* ${this.formatearFechaLegible(reserva.fecha)}
+⏰ *Horario:* ${reserva.horaInicio}:00 - ${reserva.horaFin}:00
+
+🔢 *Código de Reserva:* ${reserva.codigoReserva}
+⏰ *Cancelado:* ${new Date().toLocaleString('es-ES')}
+
+_Reserva cancelada por el cliente_`;
+
+        const mensajeCodificado = encodeURIComponent(mensaje);
+        const urlWhatsApp = `https://wa.me/${telefonoAdmin}?text=${mensajeCodificado}`;
+        window.open(urlWhatsApp, '_blank');
+    }
+
+    // ===== MEJORAS EN VERIFICACIÓN DE DISPONIBILIDAD =====
+
+    // Verificar disponibilidad de rango completo
+    verificarDisponibilidadRangoCompleto(fecha, canchaId, horaInicio, horaFin) {
+        for (let hora = horaInicio; hora < horaFin; hora++) {
+            if (this.estaHoraOcupada(fecha, canchaId, hora)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    // MEJORADO: Verificación de disponibilidad
+    verificarDisponibilidad(reserva = null) {
+        const reservaAVerificar = reserva || {
+            canchaId: this.state.canchaSeleccionada.id,
+            fecha: this.state.fechaSeleccionada,
+            horaInicio: this.state.horaInicioSeleccionada,
+            horaFin: this.state.horaFinSeleccionada
+        };
+
+        // Excluir la reserva que se está editando (si existe)
+        const reservaEditandoId = this.state.reservaEditando ? this.state.reservaEditando.id : null;
+
+        return !this.state.reservas.some(r => 
+            r.id !== reservaEditandoId && // Excluir la reserva en edición
+            r.canchaId === reservaAVerificar.canchaId && 
+            r.fecha === reservaAVerificar.fecha &&
+            r.estado === 'confirmada' &&
+            ((r.horaInicio < reservaAVerificar.horaFin && r.horaFin > reservaAVerificar.horaInicio))
+        );
+    }
+
     // ===== MÉTODOS NUEVOS PARA GESTIÓN DE RESERVAS =====
 
     // Obtener reservas del usuario actual
@@ -468,6 +585,9 @@ class SistemaCanchaRanger {
             // Enviar email de cancelación
             const cancha = this.canchas.find(c => c.id === reserva.canchaId);
             await this.emailService.enviarCancelacionUsuario(reserva, cancha);
+
+            // NUEVO: Enviar WhatsApp de cancelación
+            this.enviarWhatsAppCancelacion(reserva);
 
             this.mostrarNotificacion('Reserva cancelada exitosamente', 'success');
             this.actualizarInterfaz();
@@ -628,22 +748,6 @@ class SistemaCanchaRanger {
                this.state.fechaSeleccionada && 
                this.state.horaInicioSeleccionada && 
                this.state.horaFinSeleccionada;
-    }
-
-    verificarDisponibilidad(reserva = null) {
-        const reservaAVerificar = reserva || {
-            canchaId: this.state.canchaSeleccionada.id,
-            fecha: this.state.fechaSeleccionada,
-            horaInicio: this.state.horaInicioSeleccionada,
-            horaFin: this.state.horaFinSeleccionada
-        };
-
-        return !this.state.reservas.some(r => 
-            r.canchaId === reservaAVerificar.canchaId && 
-            r.fecha === reservaAVerificar.fecha &&
-            r.estado === 'confirmada' &&
-            ((r.horaInicio < reservaAVerificar.horaFin && r.horaFin > reservaAVerificar.horaInicio))
-        );
     }
 
     // ===== UTILIDADES =====
@@ -895,6 +999,10 @@ class SistemaCanchaRanger {
                     <div class="codigo-reserva">
                         <strong>Código de reserva:</strong>
                         <div class="codigo">${reserva.codigoReserva}</div>
+                    </div>
+                    <div class="whatsapp-info">
+                        <i class="fab fa-whatsapp"></i>
+                        <span>Se ha enviado una notificación por WhatsApp al administrador</span>
                     </div>
                     <div class="email-info">
                         <i class="fas fa-envelope"></i>
