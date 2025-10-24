@@ -22,49 +22,51 @@ class SistemaCanchaRanger {
         // CORREGIR: IDs duplicados en canchas
         this.canchas = [
             {
-                id: 1,
-                nombre: "Cancha 1 Wally",
-                tipo: "Voleibol",
-                precio: this.config.precioWally,
-                imagen:"cancha1.jpg",
-                descripcion: "Cancha profesional de voleibol con medidas oficiales.",
-                caracteristicas: ["Iluminación profesional", "Piso de madera", "Red profesional"],
-                estado: "disponible",
-                capacidad: "6v6"
-            },
-            {
-                id: 2,
-                nombre: "Cancha 2 Wally",
-                tipo: "Voleibol",
-                precio: this.config.precioWally,
-                imagen: "cancha2.jpg",
-                descripcion: "Cancha de voleibol con iluminación profesional.",
-                caracteristicas: ["Iluminación LED", "Vestuarios cerca", "Marcación oficial"],
-                estado: "disponible",
-                capacidad: "6v6"
-            },
-            {
-                id: 3,
-                nombre: "Cancha 3 Wally",
-                tipo: "Voleibol",
-                precio: this.config.precioWally,
-                imagen: cancha3.jpg",
-                descripcion: "Cancha competitiva de voleibol ideal para torneos y partidos.",
-                caracteristicas: ["Marcación oficial", "Red profesional", "Área de descanso"],
-                estado: "disponible",
-                capacidad: "6v6"
-            },
-            {
-                id: 4, // CORREGIDO: Cambiado de 3 a 4
-                nombre: "Cancha 4 Futsal",
-                tipo: "Futsal",
-                precio: this.config.precioFutsal,
-                imagen: "futsal.jpg",
-                descripcion: "Cancha sintetica de futsal ideal para torneos.",
-                caracteristicas: ["Piso sintético", "Arcos profesionales", "Iluminación LED"],
-                estado: "disponible",
-                capacidad: "10v10"
-            },
+                this.canchas = [
+    {
+        id: 1,
+        nombre: "Cancha 1 Wally",
+        tipo: "Voleibol",
+        precio: this.config.precioWally,
+        imagen: "cancha1.jpg", // ✅ Agregar ./
+        descripcion: "Cancha profesional de voleibol con medidas oficiales.",
+        caracteristicas: ["Iluminación profesional", "Piso de madera", "Red profesional"],
+        estado: "disponible",
+        capacidad: "6v6"
+    },
+    {
+        id: 2,
+        nombre: "Cancha 2 Wally", 
+        tipo: "Voleibol",
+        precio: this.config.precioWally,
+        imagen: "cancha2.jpg", // ✅ Cambiar a imagen local
+        descripcion: "Cancha de voleibol con iluminación profesional.",
+        caracteristicas: ["Iluminación LED", "Vestuarios cerca", "Marcación oficial"],
+        estado: "disponible",
+        capacidad: "6v6"
+    },
+    {
+        id: 3,
+        nombre: "Cancha 3 Wally",
+        tipo: "Voleibol", 
+        precio: this.config.precioWally,
+        imagen: "cancha3.jpg", // ✅ Cambiar a imagen local
+        descripcion: "Cancha competitiva de voleibol ideal para torneos y partidos.",
+        caracteristicas: ["Marcación oficial", "Red profesional", "Área de descanso"],
+        estado: "disponible",
+        capacidad: "6v6"
+    },
+    {
+        id: 4,
+        nombre: "Cancha 4 Futsal",
+        tipo: "Futsal",
+        precio: this.config.precioFutsal,
+        imagen: "futsal.jpg", // ✅ Cambiar a imagen local
+        descripcion: "Cancha sintetica de futsal ideal para torneos.",
+        caracteristicas: ["Piso sintético", "Arcos profesionales", "Iluminación LED"],
+        estado: "disponible", 
+        capacidad: "10v10"
+    },
         ];
 
         this.state = {
