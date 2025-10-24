@@ -1966,6 +1966,18 @@ section {
     margin-top: 0.5rem;
 }
 
+.whatsapp-info {
+    background: #25D366;
+    color: white;
+    padding: 1rem;
+    border-radius: var(--border-radius-sm);
+    margin-top: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+}
+
 .email-info {
     background: #e3f2fd;
     padding: 1rem;
@@ -2018,6 +2030,11 @@ section {
 .estado-cancelada {
     background: var(--error-color);
     color: white;
+}
+
+.estado-pendiente {
+    background: var(--warning-color);
+    color: black;
 }
 
 .modal-actions {
@@ -2688,4 +2705,181 @@ body.loading::before {
     clip: rect(0, 0, 0, 0);
     white-space: nowrap;
     border: 0;
+}
+
+
+/* ===== ESTILOS WHATSAPP MEJORADOS ===== */
+
+/* Botón flotante de WhatsApp */
+.whatsapp-flotante {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+    animation: pulse-whatsapp 2s infinite;
+}
+
+.whatsapp-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #25D366;
+    color: white;
+    padding: 15px 20px;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: 600;
+    box-shadow: 0 4px 20px rgba(37, 211, 102, 0.4);
+    transition: all 0.3s ease;
+}
+
+.whatsapp-link:hover {
+    background: #128C7E;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 25px rgba(37, 211, 102, 0.6);
+}
+
+.whatsapp-link i {
+    font-size: 24px;
+}
+
+.whatsapp-link span {
+    font-size: 14px;
+}
+
+/* Botón WhatsApp en canchas */
+.btn-whatsapp-cancha {
+    background: #25D366;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: var(--border-radius-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.btn-whatsapp-cancha:hover {
+    background: #128C7E;
+    transform: translateY(-2px);
+}
+
+/* Opción WhatsApp en formulario de reserva */
+.whatsapp-option {
+    background: rgba(37, 211, 102, 0.1);
+    border: 2px solid #25D366;
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    text-align: center;
+    margin-top: 1rem;
+}
+
+.whatsapp-option h4 {
+    color: #25D366;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.whatsapp-features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin: 1.5rem 0;
+}
+
+.whatsapp-feature {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.whatsapp-feature i {
+    color: #25D366;
+}
+
+/* Animación de pulso para WhatsApp */
+@keyframes pulse-whatsapp {
+    0% {
+        box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(37, 211, 102, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(37, 211, 102, 0);
+    }
+}
+
+/* Modal WhatsApp */
+.modal-whatsapp .modal-content {
+    max-width: 500px;
+}
+
+.whatsapp-modal-content {
+    text-align: center;
+    padding: 2rem;
+}
+
+.whatsapp-icon {
+    font-size: 4rem;
+    color: #25D366;
+    margin-bottom: 1rem;
+}
+
+.whatsapp-steps {
+    text-align: left;
+    margin: 2rem 0;
+}
+
+.whatsapp-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: rgba(37, 211, 102, 0.05);
+    border-radius: var(--border-radius-sm);
+}
+
+.step-number {
+    background: #25D366;
+    color: white;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    flex-shrink: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .whatsapp-link span {
+        display: none;
+    }
+    
+    .whatsapp-link {
+        padding: 15px;
+        border-radius: 50%;
+        width: 60px;
+        height: 60px;
+        justify-content: center;
+    }
+    
+    .whatsapp-features {
+        grid-template-columns: 1fr;
+    }
 }

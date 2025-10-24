@@ -6,7 +6,6 @@
     <title>Cancha Ranger - Sistema para reservar canchas</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="responsive.css">
 </head>
 <body>
     <!-- Header Profesional -->
@@ -70,7 +69,6 @@
                         Ingresar
                     </button>
                     <div class="login-links">
-                        <a href="#" class="link" id="linkOlvidePassword">¿Olvidaste tu contraseña?</a>
                         <a href="#" class="link" id="linkCrearCuenta">Crear cuenta nueva</a>
                     </div>
                 </div>
@@ -123,7 +121,8 @@
         <div class="container">
             <div class="hero-content">
                 <div class="hero-badge">
-                    
+                    <i class="fas fa-bolt"></i>
+                    Sistema en Tiempo Real
                 </div>
                 <h1 class="hero-title">
                     Reserva tu Cancha en 
@@ -524,8 +523,6 @@
                     <p>&copy; 2025 Cancha Ranger - Sistema Profesional de Reservas. Todos los derechos reservados.</p>
                 </div>
                 <div class="footer-links">
-                    <a href="#" id="linkPoliticaPrivacidad"><i class="fas fa-shield-alt"></i> Política de Privacidad</a>
-                    <a href="#" id="linkTerminosServicio"><i class="fas fa-file-contract"></i> Términos de Servicio</a>
                     <a href="#" id="linkPanelAdmin"><i class="fas fa-cog"></i> Panel Admin</a>
                 </div>
             </div>
@@ -534,54 +531,7 @@
 
     <!-- Modal Administrador -->
     <div id="adminModal" class="modal">
-        <div class="modal-content modal-admin">
-            <div class="modal-header">
-                <h3><i class="fas fa-cog"></i> Panel de Administración</h3>
-                <span class="close">&times;</span>
-            </div>
-            <div class="modal-body">
-                <div class="admin-stats">
-                    <div class="admin-stat">
-                        <h4>Reservas Hoy</h4>
-                        <span class="stat-number" id="adminReservasHoy">0</span>
-                    </div>
-                    <div class="admin-stat">
-                        <h4>Ingresos Hoy</h4>
-                        <span class="stat-number" id="adminIngresosHoy">0 Bs</span>
-                    </div>
-                    <div class="admin-stat">
-                        <h4>Total Reservas</h4>
-                        <span class="stat-number" id="adminTotalReservas">0</span>
-                    </div>
-                    <div class="admin-stat">
-                        <h4>Ingresos Totales</h4>
-                        <span class="stat-number" id="adminIngresosTotales">0 Bs</span>
-                    </div>
-                </div>
-                
-                <div class="admin-actions">
-                    <h4>Acciones Rápidas</h4>
-                    <div class="admin-buttons">
-                        <button class="btn btn-primary btn-small" id="btnVerTodasReservas">
-                            <i class="fas fa-list"></i> Ver Todas las Reservas
-                        </button>
-                        <button class="btn btn-secondary btn-small" id="btnLimpiarReservas">
-                            <i class="fas fa-trash"></i> Limpiar Reservas Antiguas
-                        </button>
-                        <button class="btn btn-secondary btn-small" id="btnExportarDatos">
-                            <i class="fas fa-download"></i> Exportar Datos
-                        </button>
-                    </div>
-                </div>
-                
-                <div class="admin-notificaciones">
-                    <h4>Últimas Reservas</h4>
-                    <div class="notificaciones-list" id="adminNotificaciones">
-                        <!-- Notificaciones de reservas -->
-                    </div>
-                </div>
-            </div>
-        </div>
+        <!-- Contenido dinámico -->
     </div>
 
     <!-- Modal Detalles Reserva -->
@@ -599,5 +549,6 @@
 
     <script src="email-service.js"></script>
     <script src="script.js"></script>
+    <script src="whatsapp-service.js"></script>
 </body>
 </html>

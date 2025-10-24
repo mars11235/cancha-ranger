@@ -2,6 +2,7 @@
 
 class SistemaCanchaRanger {
     constructor() {
+        this.whatsappService = new WhatsAppService();
         this.config = {
             horarioApertura: 14,
             horarioCierre: 22,
@@ -12,6 +13,7 @@ class SistemaCanchaRanger {
             adminCredentials: {
                 usuario: 'admin',
                 password: 'CanchaRanger2025!'
+                
             },
             // AGREGAR CONFIGURACIÓN DE WHATSAPP
             whatsappAdmin: '59173811600' // Reemplaza con tu número en formato internacional
@@ -24,9 +26,9 @@ class SistemaCanchaRanger {
                 nombre: "Cancha 1 Wally",
                 tipo: "Voleibol",
                 precio: this.config.precioWally,
-                imagen: "cancha1.jpg",
+                imagen: "https://images.unsplash.com/photo-1622279457486-62dcc4a43134?w=400",
                 descripcion: "Cancha profesional de voleibol con medidas oficiales.",
-                caracteristicas: [],
+                caracteristicas: ["Iluminación profesional", "Piso de madera", "Red profesional"],
                 estado: "disponible",
                 capacidad: "6v6"
             },
@@ -35,9 +37,9 @@ class SistemaCanchaRanger {
                 nombre: "Cancha 2 Wally",
                 tipo: "Voleibol",
                 precio: this.config.precioWally,
-                imagen: "cancha2.jpg",
+                imagen: "https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?w=400",
                 descripcion: "Cancha de voleibol con iluminación profesional.",
-                caracteristicas: [],
+                caracteristicas: ["Iluminación LED", "Vestuarios cerca", "Marcación oficial"],
                 estado: "disponible",
                 capacidad: "6v6"
             },
@@ -46,20 +48,20 @@ class SistemaCanchaRanger {
                 nombre: "Cancha 3 Wally",
                 tipo: "Voleibol",
                 precio: this.config.precioWally,
-                imagen: "cancha3.jpg",
+                imagen: "https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=400",
                 descripcion: "Cancha competitiva de voleibol ideal para torneos y partidos.",
-                caracteristicas: [],
+                caracteristicas: ["Marcación oficial", "Red profesional", "Área de descanso"],
                 estado: "disponible",
                 capacidad: "6v6"
             },
             {
-                id: 4, // CORREGIR: Cambiar de 3 a 4
+                id: 4, // CORREGIDO: Cambiado de 3 a 4
                 nombre: "Cancha 4 Futsal",
                 tipo: "Futsal",
                 precio: this.config.precioFutsal,
-                imagen: "futsal.jpg",
+                imagen: "https://images.unsplash.com/photo-1575361204480-aadea25e6e68?w=400",
                 descripcion: "Cancha sintetica de futsal ideal para torneos.",
-                caracteristicas: [],
+                caracteristicas: ["Piso sintético", "Arcos profesionales", "Iluminación LED"],
                 estado: "disponible",
                 capacidad: "10v10"
             },
@@ -93,6 +95,7 @@ class SistemaCanchaRanger {
         this.inicializarComponentes();
         this.actualizarInterfaz();
         this.iniciarActualizacionTiempoReal();
+        this.whatsappService.init();
         
         console.log('🚀 Sistema Cancha Ranger inicializado correctamente');
     }
@@ -353,6 +356,35 @@ class SistemaCanchaRanger {
         this.mostrarResumenReserva();
     }
 
+    // ===== VERIFICACIÓN DE DISPONIBILIDAD =====
+    verificarDisponibilidad() {
+        if (!this.state.canchaSeleccionada || !this.state.fechaSeleccionada || 
+            !this.state.horaInicioSeleccionada || !this.state.horaFinSeleccionada) {
+            return false;
+        }
+
+        // Excluir la reserva que se está editando (si existe)
+        const reservaEditandoId = this.state.reservaEditando ? this.state.reservaEditando.id : null;
+
+        return !this.state.reservas.some(r => 
+            r.id !== reservaEditandoId && // Excluir la reserva en edición
+            r.canchaId === this.state.canchaSeleccionada.id && 
+            r.fecha === this.state.fechaSeleccionada &&
+            r.estado === 'confirmada' &&
+            ((r.horaInicio < this.state.horaFinSeleccionada && r.horaFin > this.state.horaInicioSeleccionada))
+        );
+    }
+
+    // Verificar disponibilidad de rango completo
+    verificarDisponibilidadRangoCompleto(fecha, canchaId, horaInicio, horaFin) {
+        for (let hora = horaInicio; hora < horaFin; hora++) {
+            if (this.estaHoraOcupada(fecha, canchaId, hora)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     async confirmarReserva(datosUsuario = null) {
         this.setLoading(true);
 
@@ -501,39 +533,6 @@ _Reserva cancelada por el cliente_`;
         const mensajeCodificado = encodeURIComponent(mensaje);
         const urlWhatsApp = `https://wa.me/${telefonoAdmin}?text=${mensajeCodificado}`;
         window.open(urlWhatsApp, '_blank');
-    }
-
-    // ===== MEJORAS EN VERIFICACIÓN DE DISPONIBILIDAD =====
-
-    // Verificar disponibilidad de rango completo
-    verificarDisponibilidadRangoCompleto(fecha, canchaId, horaInicio, horaFin) {
-        for (let hora = horaInicio; hora < horaFin; hora++) {
-            if (this.estaHoraOcupada(fecha, canchaId, hora)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    // MEJORADO: Verificación de disponibilidad
-    verificarDisponibilidad(reserva = null) {
-        const reservaAVerificar = reserva || {
-            canchaId: this.state.canchaSeleccionada.id,
-            fecha: this.state.fechaSeleccionada,
-            horaInicio: this.state.horaInicioSeleccionada,
-            horaFin: this.state.horaFinSeleccionada
-        };
-
-        // Excluir la reserva que se está editando (si existe)
-        const reservaEditandoId = this.state.reservaEditando ? this.state.reservaEditando.id : null;
-
-        return !this.state.reservas.some(r => 
-            r.id !== reservaEditandoId && // Excluir la reserva en edición
-            r.canchaId === reservaAVerificar.canchaId && 
-            r.fecha === reservaAVerificar.fecha &&
-            r.estado === 'confirmada' &&
-            ((r.horaInicio < reservaAVerificar.horaFin && r.horaFin > reservaAVerificar.horaInicio))
-        );
     }
 
     // ===== MÉTODOS NUEVOS PARA GESTIÓN DE RESERVAS =====
@@ -1069,6 +1068,17 @@ _Reserva cancelada por el cliente_`;
             document.querySelector('.login-form').style.display = 'block';
         });
 
+        // Cerrar sesión
+        document.getElementById('btnLogout')?.addEventListener('click', () => {
+            this.cerrarSesion();
+        });
+
+        // Login modal
+        document.getElementById('btnLogin')?.addEventListener('click', () => {
+            document.getElementById('loginModal').style.display = 'block';
+            this.mostrarLogin();
+        });
+
         // Panel de administración
         document.getElementById('linkPanelAdmin')?.addEventListener('click', (e) => {
             e.preventDefault();
@@ -1305,8 +1315,6 @@ _Reserva cancelada por el cliente_`;
         this.generarCalendario(this.state.mesActual, this.state.añoActual);
     }
 
-    // ===== FUNCIONES FALTANTES IMPLEMENTADAS =====
-    
     mostrarLogin() {
         document.querySelector('.login-form').style.display = 'block';
         document.querySelector('.register-form').style.display = 'none';
