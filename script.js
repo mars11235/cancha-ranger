@@ -423,365 +423,159 @@ seleccionarFecha(fecha) {
         diaSeleccionado.classList.add('seleccionado');
     }
 
-    this.actualizarProgresoReserva(2);
-    this.actualizarHorarios();
-    this.mostrarResumenReserva();
+    
+    // ===== SISTEMA DE RESERVAS COMPLETO =====
+    mostrarResumenReserva() {
+        const resumenDetalles = document.getElementById('resumenDetalles');
+        if (!resumenDetalles) return;
 
-    this.mostrarNotificacion(`Fecha seleccionada: ${this.formatearFechaLegible(fecha)}`, 'success');
-}
-
-seleccionarHora(hora) {
-    if (!this.state.fechaSeleccionada) {
-        this.mostrarNotificacion('Primero selecciona una fecha', 'error');
-        return;
+        if (this.validarReservaCompleta()) {
+            const horas = this.state.horaFinSeleccionada - this.state.horaInicioSeleccionada;
+            const total = horas * this.state.canchaSeleccionada.precio;
+            
+            resumenDetalles.innerHTML = `
+                <div class="resumen-item">
+                    <strong>Cancha:</strong> ${this.state.canchaSeleccionada.nombre}
+                </div>
+                <div class="resumen-item">
+                    <strong>Fecha:</strong> ${this.formatearFechaLegible(this.state.fechaSeleccionada)}
+                </div>
+                <div class="resumen-item">
+                    <strong>Horario:</strong> ${this.state.horaInicioSeleccionada}:00 - ${this.state.horaFinSeleccionada}:00
+                </div>
+                <div class="resumen-item">
+                    <strong>Duración:</strong> ${horas} hora${horas > 1 ? 's' : ''}
+                </div>
+                <div class="resumen-item total">
+                    <strong>Total a pagar:</strong> ${total} Bs
+                </div>
+                <button class="btn btn-primary btn-block" onclick="sistema.confirmarReserva()">
+                    <i class="fas fa-check-circle"></i>
+                    Confirmar Reserva
+                </button>
+            `;
+        } else {
+            resumenDetalles.innerHTML = '<p class="resumen-vacio">Completa todos los pasos para ver el resumen</p>';
+        }
     }
 
-    if (!this.state.horaInicioSeleccionada) {
-        // Seleccionar hora de inicio
-        this.state.horaInicioSeleccionada = hora;
-        this.mostrarNotificacion(`Hora de inicio: ${hora}:00 - Selecciona hora de fin`, 'info');
-    } else if (!this.state.horaFinSeleccionada && hora > this.state.horaInicioSeleccionada) {
-        // Verificar disponibilidad
-        const disponible = this.verificarDisponibilidadRango(
-            this.state.fechaSeleccionada,
-            this.state.canchaSeleccionada.id,
-            this.state.horaInicioSeleccionada,
-            hora
-        );
-
-        if (!disponible) {
-            this.mostrarNotificacion('Algunas horas en este rango están ocupadas', 'error');
+    async confirmarReserva() {
+        if (!this.validarReservaCompleta()) {
+            this.mostrarNotificacion('Completa todos los datos de la reserva', 'error');
             return;
         }
 
-        // Seleccionar hora de fin
-        this.state.horaFinSeleccionada = hora;
-        this.actualizarProgresoReserva(3);
-        this.mostrarNotificacion(`Horario seleccionado: ${this.state.horaInicioSeleccionada}:00 - ${hora}:00`, 'success');
-    } else {
-        // Reiniciar selección
-        this.state.horaInicioSeleccionada = hora;
-        this.state.horaFinSeleccionada = null;
-        this.mostrarNotificacion(`Hora de inicio: ${hora}:00 - Selecciona hora de fin`, 'info');
-    }
-
-    this.actualizarHorarios();
-    this.mostrarResumenReserva();
-}
-
-
-// ===== FUNCIONES DE APOYO PARA RESERVAS =====
-actualizarHorarios() {
-    const horariosGrid = document.getElementById('horariosGrid');
-    if (!horariosGrid) return;
-
-    let html = '';
-    for (let hora = this.config.horarioApertura; hora < this.config.horarioCierre; hora++) {
-        const ocupado = this.estaHoraOcupada(this.state.fechaSeleccionada, this.state.canchaSeleccionada?.id, hora);
-        const seleccionado = this.estaHoraSeleccionada(hora);
-        const clases = `hora-slot ${ocupado ? 'ocupado' : 'disponible'} ${seleccionado ? 'seleccionado' : ''}`;
-        
-        html += `
-            <div class="${clases}" 
-                 data-hora="${hora}"
-                 onclick="sistema.seleccionarHora(${hora})">
-                ${hora}:00
-            </div>
-        `;
-    }
-
-    horariosGrid.innerHTML = html;
-    this.actualizarInfoHoraSeleccion();
-}
-
-estaHoraOcupada(fecha, canchaId, hora) {
-    if (!fecha || !canchaId) return false;
-
-    return this.state.reservas.some(r => 
-        r.canchaId === canchaId && 
-        r.fecha === fecha &&
-        r.estado === 'confirmada' &&
-        hora >= r.horaInicio && hora < r.horaFin
-    );
-}
-
-estaHoraSeleccionada(hora) {
-    if (!this.state.horaInicioSeleccionada || !this.state.horaFinSeleccionada) {
-        return hora === this.state.horaInicioSeleccionada;
-    }
-    return hora >= this.state.horaInicioSeleccionada && hora < this.state.horaFinSeleccionada;
-}
-
-verificarDisponibilidadRango(fecha, canchaId, horaInicio, horaFin) {
-    for (let hora = horaInicio; hora < horaFin; hora++) {
-        if (this.estaHoraOcupada(fecha, canchaId, hora)) {
-            return false;
+        if (!this.state.usuarioActual) {
+            this.mostrarNotificacion('Debes iniciar sesión para realizar una reserva', 'error');
+            document.getElementById('loginModal').style.display = 'block';
+            return;
         }
-    }
-    return true;
-}
 
-    // ===== USUARIOS =====
-    async registrarUsuario(datosUsuario) {
         this.setLoading(true);
         try {
-            if (!this.validarEmail(datosUsuario.email)) {
-                throw new Error('El formato del email es inválido');
-            }
-            if (!this.validarTelefono(datosUsuario.telefono)) {
-                throw new Error('El formato del teléfono es inválido');
-            }
-            if (datosUsuario.password.length < 6) {
-                throw new Error('La contraseña debe tener al menos 6 caracteres');
-            }
-            if (this.state.usuarios.find(u => u.email === datosUsuario.email)) {
-                throw new Error('Este email ya está registrado');
-            }
-
-            const nuevoUsuario = {
-                id: this.generarId(),
-                ...datosUsuario,
-                fechaRegistro: new Date().toISOString(),
-                reservas: [],
-                activo: true
-            };
-
-            this.state.usuarios.push(nuevoUsuario);
-            this.guardarDatos('usuarios', this.state.usuarios);
-            this.iniciarSesion(nuevoUsuario);
-
-            this.mostrarNotificacion(`¡Cuenta creada exitosamente! Bienvenido ${datosUsuario.nombre}`, 'success');
-            return true;
-
+            const reserva = this.crearReserva();
+            this.procesarReserva(reserva);
+            this.mostrarConfirmacionReserva(reserva);
+            this.resetearSistemaReservas();
         } catch (error) {
-            this.mostrarNotificacion(error.message, 'error');
-            return false;
+            this.mostrarNotificacion('Error al procesar la reserva', 'error');
         } finally {
             this.setLoading(false);
         }
     }
 
-    async iniciarSesion(credenciales) {
-        this.setLoading(true);
-        try {
-            const usuario = this.state.usuarios.find(u => 
-                u.email === credenciales.email && 
-                u.password === credenciales.password &&
-                u.activo !== false
-            );
-
-            if (usuario) {
-                this.state.usuarioActual = usuario;
-                this.guardarDatos('usuarioActual', usuario);
-                this.actualizarInterfaz();
-                this.mostrarNotificacion(`¡Bienvenido ${usuario.nombre}!`, 'success');
-                document.getElementById('loginModal').style.display = 'none';
-                return true;
-            } else {
-                throw new Error('Credenciales incorrectas');
-            }
-        } catch (error) {
-            this.mostrarNotificacion(error.message, 'error');
-            return false;
-        } finally {
-            this.setLoading(false);
-        }
-    }
-
-    cerrarSesion() {
-        this.state.usuarioActual = null;
-        this.guardarDatos('usuarioActual', null);
-        this.actualizarInterfaz();
-        this.mostrarNotificacion('Sesión cerrada correctamente', 'info');
-    }
-
-    // ===== UTILIDADES =====
-    setLoading(estado) {
-        this.state.isLoading = estado;
-    }
-
-    mostrarNotificacion(mensaje, tipo = 'info') {
-        console.log(`[${tipo.toUpperCase()}] ${mensaje}`);
-        // En un sistema real, aquí mostrarías un toast
-        alert(`[${tipo.toUpperCase()}] ${mensaje}`);
-    }
-
-    validarEmail(email) {
-        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return regex.test(email);
-    }
-
-    validarTelefono(telefono) {
-        const regex = /^[0-9]{8,15}$/;
-        return regex.test(telefono);
-    }
-
-    generarId() {
-        return Date.now().toString(36) + Math.random().toString(36).substr(2);
-    }
-
-    generarCodigoReserva() {
-        return 'CR' + Date.now().toString(36).toUpperCase();
-    }
-
-    formatearFechaISO(fecha) {
-        return fecha.toISOString().split('T')[0];
-    }
-}
-
-// ===== SISTEMA DE RESERVAS COMPLETO =====
-mostrarResumenReserva() {
-    const resumenDetalles = document.getElementById('resumenDetalles');
-    if (!resumenDetalles) return;
-
-    if (this.validarReservaCompleta()) {
+    crearReserva() {
         const horas = this.state.horaFinSeleccionada - this.state.horaInicioSeleccionada;
         const total = horas * this.state.canchaSeleccionada.precio;
+
+        return {
+            id: this.generarId(),
+            canchaId: this.state.canchaSeleccionada.id,
+            fecha: this.state.fechaSeleccionada,
+            horaInicio: this.state.horaInicioSeleccionada,
+            horaFin: this.state.horaFinSeleccionada,
+            usuario: this.state.usuarioActual,
+            estado: "confirmada",
+            total: total,
+            timestamp: new Date().toISOString(),
+            codigoReserva: this.generarCodigoReserva(),
+            pagado: false
+        };
+    }
+
+    procesarReserva(reserva) {
+        this.state.reservas.push(reserva);
+        this.guardarDatos('reservas', this.state.reservas);
+        this.mostrarNotificacion(`¡Reserva confirmada! Código: ${reserva.codigoReserva}`, 'success');
+    }
+
+    mostrarConfirmacionReserva(reserva) {
+        alert(`✅ RESERVA CONFIRMADA\n\nCancha: ${this.state.canchaSeleccionada.nombre}\nFecha: ${this.formatearFechaLegible(reserva.fecha)}\nHorario: ${reserva.horaInicio}:00 - ${reserva.horaFin}:00\nTotal: ${reserva.total} Bs\nCódigo: ${reserva.codigoReserva}`);
+    }
+
+    resetearSistemaReservas() {
+        this.state.canchaSeleccionada = null;
+        this.state.fechaSeleccionada = null;
+        this.state.horaInicioSeleccionada = null;
+        this.state.horaFinSeleccionada = null;
         
-        resumenDetalles.innerHTML = `
-            <div class="resumen-item">
-                <strong>Cancha:</strong> ${this.state.canchaSeleccionada.nombre}
-            </div>
-            <div class="resumen-item">
-                <strong>Fecha:</strong> ${this.formatearFechaLegible(this.state.fechaSeleccionada)}
-            </div>
-            <div class="resumen-item">
-                <strong>Horario:</strong> ${this.state.horaInicioSeleccionada}:00 - ${this.state.horaFinSeleccionada}:00
-            </div>
-            <div class="resumen-item">
-                <strong>Duración:</strong> ${horas} hora${horas > 1 ? 's' : ''}
-            </div>
-            <div class="resumen-item total">
-                <strong>Total a pagar:</strong> ${total} Bs
-            </div>
-            <button class="btn btn-primary btn-block" onclick="sistema.confirmarReserva()">
-                <i class="fas fa-check-circle"></i>
-                Confirmar Reserva
-            </button>
-        `;
-    } else {
-        resumenDetalles.innerHTML = '<p class="resumen-vacio">Completa todos los pasos para ver el resumen</p>';
-    }
-}
-
-async confirmarReserva() {
-    if (!this.validarReservaCompleta()) {
-        this.mostrarNotificacion('Completa todos los datos de la reserva', 'error');
-        return;
+        this.actualizarHorarios();
+        this.mostrarResumenReserva();
+        
+        // Resetear selección en lista
+        document.querySelectorAll('.cancha-item-lista').forEach(item => {
+            item.classList.remove('seleccionada');
+        });
     }
 
-    if (!this.state.usuarioActual) {
-        this.mostrarNotificacion('Debes iniciar sesión para realizar una reserva', 'error');
-        document.getElementById('loginModal').style.display = 'block';
-        return;
+    // ===== FUNCIONES UTILITARIAS =====
+    validarReservaCompleta() {
+        return this.state.canchaSeleccionada && 
+               this.state.fechaSeleccionada && 
+               this.state.horaInicioSeleccionada && 
+               this.state.horaFinSeleccionada;
     }
 
-    this.setLoading(true);
-    try {
-        const reserva = this.crearReserva();
-        this.procesarReserva(reserva);
-        this.mostrarConfirmacionReserva(reserva);
-        this.resetearSistemaReservas();
-    } catch (error) {
-        this.mostrarNotificacion('Error al procesar la reserva', 'error');
-    } finally {
-        this.setLoading(false);
+    validarFechaFutura(fecha) {
+        const hoy = new Date().toISOString().split('T')[0];
+        return fecha >= hoy;
     }
-}
 
-crearReserva() {
-    const horas = this.state.horaFinSeleccionada - this.state.horaInicioSeleccionada;
-    const total = horas * this.state.canchaSeleccionada.precio;
-
-    return {
-        id: this.generarId(),
-        canchaId: this.state.canchaSeleccionada.id,
-        fecha: this.state.fechaSeleccionada,
-        horaInicio: this.state.horaInicioSeleccionada,
-        horaFin: this.state.horaFinSeleccionada,
-        usuario: this.state.usuarioActual,
-        estado: "confirmada",
-        total: total,
-        timestamp: new Date().toISOString(),
-        codigoReserva: this.generarCodigoReserva(),
-        pagado: false
-    };
-}
-
-procesarReserva(reserva) {
-    this.state.reservas.push(reserva);
-    this.guardarDatos('reservas', this.state.reservas);
-    this.mostrarNotificacion(`¡Reserva confirmada! Código: ${reserva.codigoReserva}`, 'success');
-}
-
-mostrarConfirmacionReserva(reserva) {
-    alert(`✅ RESERVA CONFIRMADA\n\nCancha: ${this.state.canchaSeleccionada.nombre}\nFecha: ${this.formatearFechaLegible(reserva.fecha)}\nHorario: ${reserva.horaInicio}:00 - ${reserva.horaFin}:00\nTotal: ${reserva.total} Bs\nCódigo: ${reserva.codigoReserva}`);
-}
-
-resetearSistemaReservas() {
-    this.state.canchaSeleccionada = null;
-    this.state.fechaSeleccionada = null;
-    this.state.horaInicioSeleccionada = null;
-    this.state.horaFinSeleccionada = null;
-    
-    this.actualizarHorarios();
-    this.mostrarResumenReserva();
-    
-    // Resetear selección en lista
-    document.querySelectorAll('.cancha-item-lista').forEach(item => {
-        item.classList.remove('seleccionada');
-    });
-}
-
-// ===== FUNCIONES UTILITARIAS =====
-validarReservaCompleta() {
-    return this.state.canchaSeleccionada && 
-           this.state.fechaSeleccionada && 
-           this.state.horaInicioSeleccionada && 
-           this.state.horaFinSeleccionada;
-}
-
-validarFechaFutura(fecha) {
-    const hoy = new Date().toISOString().split('T')[0];
-    return fecha >= hoy;
-}
-
-formatearFechaLegible(fechaISO) {
-    const fecha = new Date(fechaISO);
-    return fecha.toLocaleDateString('es-ES', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-    });
-}
-
-actualizarInfoHoraSeleccion() {
-    const info = document.getElementById('horaSeleccionInfo');
-    if (!info) return;
-
-    if (this.state.horaInicioSeleccionada && this.state.horaFinSeleccionada) {
-        const horas = this.state.horaFinSeleccionada - this.state.horaInicioSeleccionada;
-        info.textContent = `${this.state.horaInicioSeleccionada}:00 - ${this.state.horaFinSeleccionada}:00 (${horas} hora${horas > 1 ? 's' : ''})`;
-    } else if (this.state.horaInicioSeleccionada) {
-        info.textContent = `Hora inicio: ${this.state.horaInicioSeleccionada}:00 - Selecciona hora fin`;
-    } else {
-        info.textContent = 'Selecciona rango de horas (2:00 PM - 10:00 PM)';
+    formatearFechaLegible(fechaISO) {
+        const fecha = new Date(fechaISO);
+        return fecha.toLocaleDateString('es-ES', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
     }
-}
 
-actualizarProgresoReserva(paso) {
-    const steps = document.querySelectorAll('.progress-step');
-    steps.forEach((step, index) => {
-        if (index + 1 <= paso) {
-            step.classList.add('active');
+    actualizarInfoHoraSeleccion() {
+        const info = document.getElementById('horaSeleccionInfo');
+        if (!info) return;
+
+        if (this.state.horaInicioSeleccionada && this.state.horaFinSeleccionada) {
+            const horas = this.state.horaFinSeleccionada - this.state.horaInicioSeleccionada;
+            info.textContent = `${this.state.horaInicioSeleccionada}:00 - ${this.state.horaFinSeleccionada}:00 (${horas} hora${horas > 1 ? 's' : ''})`;
+        } else if (this.state.horaInicioSeleccionada) {
+            info.textContent = `Hora inicio: ${this.state.horaInicioSeleccionada}:00 - Selecciona hora fin`;
         } else {
-            step.classList.remove('active');
+            info.textContent = 'Selecciona rango de horas (2:00 PM - 10:00 PM)';
         }
-    });
-}
-}
+    }
 
+    actualizarProgresoReserva(paso) {
+        const steps = document.querySelectorAll('.progress-step');
+        steps.forEach((step, index) => {
+            if (index + 1 <= paso) {
+                step.classList.add('active');
+            } else {
+                step.classList.remove('active');
+            }
+        });
+    }
+} 
 
 // ===== INICIALIZACIÓN GLOBAL =====
 let sistema;
