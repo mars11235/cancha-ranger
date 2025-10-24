@@ -405,6 +405,122 @@ class SistemaCanchaRanger {
         });
     }
 
+// ===== SISTEMA DE CALENDARIO Y HORARIOS =====
+seleccionarFecha(fecha) {
+    if (!this.validarFechaFutura(fecha)) {
+        this.mostrarNotificacion('No puedes reservar fechas pasadas', 'error');
+        return;
+    }
+
+    this.state.fechaSeleccionada = fecha;
+
+    // Actualizar UI
+    document.querySelectorAll('.dia-calendario').forEach(dia => {
+        dia.classList.remove('seleccionado');
+    });
+    const diaSeleccionado = document.querySelector(`.dia-calendario[data-fecha="${fecha}"]`);
+    if (diaSeleccionado) {
+        diaSeleccionado.classList.add('seleccionado');
+    }
+
+    this.actualizarProgresoReserva(2);
+    this.actualizarHorarios();
+    this.mostrarResumenReserva();
+
+    this.mostrarNotificacion(`Fecha seleccionada: ${this.formatearFechaLegible(fecha)}`, 'success');
+}
+
+seleccionarHora(hora) {
+    if (!this.state.fechaSeleccionada) {
+        this.mostrarNotificacion('Primero selecciona una fecha', 'error');
+        return;
+    }
+
+    if (!this.state.horaInicioSeleccionada) {
+        // Seleccionar hora de inicio
+        this.state.horaInicioSeleccionada = hora;
+        this.mostrarNotificacion(`Hora de inicio: ${hora}:00 - Selecciona hora de fin`, 'info');
+    } else if (!this.state.horaFinSeleccionada && hora > this.state.horaInicioSeleccionada) {
+        // Verificar disponibilidad
+        const disponible = this.verificarDisponibilidadRango(
+            this.state.fechaSeleccionada,
+            this.state.canchaSeleccionada.id,
+            this.state.horaInicioSeleccionada,
+            hora
+        );
+
+        if (!disponible) {
+            this.mostrarNotificacion('Algunas horas en este rango están ocupadas', 'error');
+            return;
+        }
+
+        // Seleccionar hora de fin
+        this.state.horaFinSeleccionada = hora;
+        this.actualizarProgresoReserva(3);
+        this.mostrarNotificacion(`Horario seleccionado: ${this.state.horaInicioSeleccionada}:00 - ${hora}:00`, 'success');
+    } else {
+        // Reiniciar selección
+        this.state.horaInicioSeleccionada = hora;
+        this.state.horaFinSeleccionada = null;
+        this.mostrarNotificacion(`Hora de inicio: ${hora}:00 - Selecciona hora de fin`, 'info');
+    }
+
+    this.actualizarHorarios();
+    this.mostrarResumenReserva();
+}
+
+
+// ===== FUNCIONES DE APOYO PARA RESERVAS =====
+actualizarHorarios() {
+    const horariosGrid = document.getElementById('horariosGrid');
+    if (!horariosGrid) return;
+
+    let html = '';
+    for (let hora = this.config.horarioApertura; hora < this.config.horarioCierre; hora++) {
+        const ocupado = this.estaHoraOcupada(this.state.fechaSeleccionada, this.state.canchaSeleccionada?.id, hora);
+        const seleccionado = this.estaHoraSeleccionada(hora);
+        const clases = `hora-slot ${ocupado ? 'ocupado' : 'disponible'} ${seleccionado ? 'seleccionado' : ''}`;
+        
+        html += `
+            <div class="${clases}" 
+                 data-hora="${hora}"
+                 onclick="sistema.seleccionarHora(${hora})">
+                ${hora}:00
+            </div>
+        `;
+    }
+
+    horariosGrid.innerHTML = html;
+    this.actualizarInfoHoraSeleccion();
+}
+
+estaHoraOcupada(fecha, canchaId, hora) {
+    if (!fecha || !canchaId) return false;
+
+    return this.state.reservas.some(r => 
+        r.canchaId === canchaId && 
+        r.fecha === fecha &&
+        r.estado === 'confirmada' &&
+        hora >= r.horaInicio && hora < r.horaFin
+    );
+}
+
+estaHoraSeleccionada(hora) {
+    if (!this.state.horaInicioSeleccionada || !this.state.horaFinSeleccionada) {
+        return hora === this.state.horaInicioSeleccionada;
+    }
+    return hora >= this.state.horaInicioSeleccionada && hora < this.state.horaFinSeleccionada;
+}
+
+verificarDisponibilidadRango(fecha, canchaId, horaInicio, horaFin) {
+    for (let hora = horaInicio; hora < horaFin; hora++) {
+        if (this.estaHoraOcupada(fecha, canchaId, hora)) {
+            return false;
+        }
+    }
+    return true;
+}
+
     // ===== USUARIOS =====
     async registrarUsuario(datosUsuario) {
         this.setLoading(true);
@@ -512,6 +628,160 @@ class SistemaCanchaRanger {
         return fecha.toISOString().split('T')[0];
     }
 }
+
+// ===== SISTEMA DE RESERVAS COMPLETO =====
+mostrarResumenReserva() {
+    const resumenDetalles = document.getElementById('resumenDetalles');
+    if (!resumenDetalles) return;
+
+    if (this.validarReservaCompleta()) {
+        const horas = this.state.horaFinSeleccionada - this.state.horaInicioSeleccionada;
+        const total = horas * this.state.canchaSeleccionada.precio;
+        
+        resumenDetalles.innerHTML = `
+            <div class="resumen-item">
+                <strong>Cancha:</strong> ${this.state.canchaSeleccionada.nombre}
+            </div>
+            <div class="resumen-item">
+                <strong>Fecha:</strong> ${this.formatearFechaLegible(this.state.fechaSeleccionada)}
+            </div>
+            <div class="resumen-item">
+                <strong>Horario:</strong> ${this.state.horaInicioSeleccionada}:00 - ${this.state.horaFinSeleccionada}:00
+            </div>
+            <div class="resumen-item">
+                <strong>Duración:</strong> ${horas} hora${horas > 1 ? 's' : ''}
+            </div>
+            <div class="resumen-item total">
+                <strong>Total a pagar:</strong> ${total} Bs
+            </div>
+            <button class="btn btn-primary btn-block" onclick="sistema.confirmarReserva()">
+                <i class="fas fa-check-circle"></i>
+                Confirmar Reserva
+            </button>
+        `;
+    } else {
+        resumenDetalles.innerHTML = '<p class="resumen-vacio">Completa todos los pasos para ver el resumen</p>';
+    }
+}
+
+async confirmarReserva() {
+    if (!this.validarReservaCompleta()) {
+        this.mostrarNotificacion('Completa todos los datos de la reserva', 'error');
+        return;
+    }
+
+    if (!this.state.usuarioActual) {
+        this.mostrarNotificacion('Debes iniciar sesión para realizar una reserva', 'error');
+        document.getElementById('loginModal').style.display = 'block';
+        return;
+    }
+
+    this.setLoading(true);
+    try {
+        const reserva = this.crearReserva();
+        this.procesarReserva(reserva);
+        this.mostrarConfirmacionReserva(reserva);
+        this.resetearSistemaReservas();
+    } catch (error) {
+        this.mostrarNotificacion('Error al procesar la reserva', 'error');
+    } finally {
+        this.setLoading(false);
+    }
+}
+
+crearReserva() {
+    const horas = this.state.horaFinSeleccionada - this.state.horaInicioSeleccionada;
+    const total = horas * this.state.canchaSeleccionada.precio;
+
+    return {
+        id: this.generarId(),
+        canchaId: this.state.canchaSeleccionada.id,
+        fecha: this.state.fechaSeleccionada,
+        horaInicio: this.state.horaInicioSeleccionada,
+        horaFin: this.state.horaFinSeleccionada,
+        usuario: this.state.usuarioActual,
+        estado: "confirmada",
+        total: total,
+        timestamp: new Date().toISOString(),
+        codigoReserva: this.generarCodigoReserva(),
+        pagado: false
+    };
+}
+
+procesarReserva(reserva) {
+    this.state.reservas.push(reserva);
+    this.guardarDatos('reservas', this.state.reservas);
+    this.mostrarNotificacion(`¡Reserva confirmada! Código: ${reserva.codigoReserva}`, 'success');
+}
+
+mostrarConfirmacionReserva(reserva) {
+    alert(`✅ RESERVA CONFIRMADA\n\nCancha: ${this.state.canchaSeleccionada.nombre}\nFecha: ${this.formatearFechaLegible(reserva.fecha)}\nHorario: ${reserva.horaInicio}:00 - ${reserva.horaFin}:00\nTotal: ${reserva.total} Bs\nCódigo: ${reserva.codigoReserva}`);
+}
+
+resetearSistemaReservas() {
+    this.state.canchaSeleccionada = null;
+    this.state.fechaSeleccionada = null;
+    this.state.horaInicioSeleccionada = null;
+    this.state.horaFinSeleccionada = null;
+    
+    this.actualizarHorarios();
+    this.mostrarResumenReserva();
+    
+    // Resetear selección en lista
+    document.querySelectorAll('.cancha-item-lista').forEach(item => {
+        item.classList.remove('seleccionada');
+    });
+}
+
+// ===== FUNCIONES UTILITARIAS =====
+validarReservaCompleta() {
+    return this.state.canchaSeleccionada && 
+           this.state.fechaSeleccionada && 
+           this.state.horaInicioSeleccionada && 
+           this.state.horaFinSeleccionada;
+}
+
+validarFechaFutura(fecha) {
+    const hoy = new Date().toISOString().split('T')[0];
+    return fecha >= hoy;
+}
+
+formatearFechaLegible(fechaISO) {
+    const fecha = new Date(fechaISO);
+    return fecha.toLocaleDateString('es-ES', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+}
+
+actualizarInfoHoraSeleccion() {
+    const info = document.getElementById('horaSeleccionInfo');
+    if (!info) return;
+
+    if (this.state.horaInicioSeleccionada && this.state.horaFinSeleccionada) {
+        const horas = this.state.horaFinSeleccionada - this.state.horaInicioSeleccionada;
+        info.textContent = `${this.state.horaInicioSeleccionada}:00 - ${this.state.horaFinSeleccionada}:00 (${horas} hora${horas > 1 ? 's' : ''})`;
+    } else if (this.state.horaInicioSeleccionada) {
+        info.textContent = `Hora inicio: ${this.state.horaInicioSeleccionada}:00 - Selecciona hora fin`;
+    } else {
+        info.textContent = 'Selecciona rango de horas (2:00 PM - 10:00 PM)';
+    }
+}
+
+actualizarProgresoReserva(paso) {
+    const steps = document.querySelectorAll('.progress-step');
+    steps.forEach((step, index) => {
+        if (index + 1 <= paso) {
+            step.classList.add('active');
+        } else {
+            step.classList.remove('active');
+        }
+    });
+}
+}
+
 
 // ===== INICIALIZACIÓN GLOBAL =====
 let sistema;
