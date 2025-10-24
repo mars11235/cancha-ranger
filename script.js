@@ -59,7 +59,7 @@ class SistemaCanchaRanger {
                 nombre: "Cancha 4 Futsal",
                 tipo: "Futsal",
                 precio: this.config.precioFutsal,
-                imagen: "Futsal.jpg",
+                imagen: "futsal.jpg",
                 descripcion: "Cancha sintetica de futsal ideal para torneos.",
                 caracteristicas: ["Piso sintético", "Arcos profesionales", "Iluminación LED"],
                 estado: "disponible",
