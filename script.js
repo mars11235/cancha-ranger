@@ -19,9 +19,8 @@ class SistemaCanchaRanger {
             whatsappAdmin: '59173811600' // Reemplaza con tu número en formato internacional
         };
 
-        // CORREGIR: IDs duplicados en canchas
-        this.canchas = [
-            {
+
+     
                 this.canchas = [
     {
         id: 1,
