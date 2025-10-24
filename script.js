@@ -1,8 +1,7 @@
-// ===== SISTEMA PROFESIONAL CANCHA RANGER - VERSIÓN COMPLETA Y CORREGIDA =====
+// ===== SISTEMA PROFESIONAL CANCHA RANGER - VERSIÓN CORREGIDA =====
 
 class SistemaCanchaRanger {
     constructor() {
-        this.whatsappService = new WhatsAppService();
         this.config = {
             horarioApertura: 14,
             horarioCierre: 22,
@@ -79,20 +78,15 @@ class SistemaCanchaRanger {
             reservaEditando: null
         };
 
-        this.emailService = new EmailService();
         this.init();
     }
 
-    // ===== INICIALIZACIÓN =====
     init() {
         this.inicializarDatos();
         this.inicializarEventListeners();
         this.inicializarComponentes();
         this.actualizarInterfaz();
-        this.iniciarActualizacionTiempoReal();
-        this.whatsappService.init();
-
-        console.log('🚀 Sistema Cancha Ranger inicializado correctamente');
+        console.log('🚀 Sistema Cancha Ranger inicializado');
     }
 
     inicializarDatos() {
@@ -123,23 +117,6 @@ class SistemaCanchaRanger {
                 timestamp: new Date().toISOString(),
                 codigoReserva: this.generarCodigoReserva(),
                 pagado: true
-            },
-            {
-                id: this.generarId(),
-                canchaId: 2,
-                fecha: this.formatearFechaISO(manana),
-                horaInicio: 18,
-                horaFin: 20,
-                usuario: {
-                    nombre: "María García",
-                    email: "maria@ejemplo.com",
-                    telefono: "73220922"
-                },
-                estado: "confirmada",
-                total: 40,
-                timestamp: new Date().toISOString(),
-                codigoReserva: this.generarCodigoReserva(),
-                pagado: false
             }
         ];
 
@@ -147,7 +124,6 @@ class SistemaCanchaRanger {
         this.guardarDatos('reservas', this.state.reservas);
     }
 
-    // ===== GESTIÓN DE DATOS =====
     cargarDatos(clave) {
         try {
             const datos = localStorage.getItem(`canchaRanger_${clave}`);
@@ -164,408 +140,20 @@ class SistemaCanchaRanger {
             return true;
         } catch (error) {
             console.error(`Error guardando ${clave}:`, error);
-            this.mostrarNotificacion('Error guardando datos', 'error');
             return false;
         }
     }
 
-    // ===== GESTIÓN DE USUARIOS =====
-    async registrarUsuario(datosUsuario) {
-        this.setLoading(true);
-
-        try {
-            if (!this.validarEmail(datosUsuario.email)) {
-                throw new Error('El formato del email es inválido');
-            }
-
-            if (!this.validarTelefono(datosUsuario.telefono)) {
-                throw new Error('El formato del teléfono es inválido');
-            }
-
-            if (datosUsuario.password.length < 6) {
-                throw new Error('La contraseña debe tener al menos 6 caracteres');
-            }
-
-            if (this.state.usuarios.find(u => u.email === datosUsuario.email)) {
-                throw new Error('Este email ya está registrado');
-            }
-
-            const nuevoUsuario = {
-                id: this.generarId(),
-                ...datosUsuario,
-                fechaRegistro: new Date().toISOString(),
-                reservas: [],
-                activo: true
-            };
-
-            this.state.usuarios.push(nuevoUsuario);
-            this.guardarDatos('usuarios', this.state.usuarios);
-
-            this.iniciarSesion(nuevoUsuario);
-
-            this.mostrarNotificacion(`¡Cuenta creada exitosamente! Bienvenido ${datosUsuario.nombre}`, 'success');
-            return true;
-
-        } catch (error) {
-            this.mostrarNotificacion(error.message, 'error');
-            return false;
-        } finally {
-            this.setLoading(false);
-        }
-    }
-
-    async iniciarSesion(credenciales) {
-        this.setLoading(true);
-
-        try {
-            const usuario = this.state.usuarios.find(u => 
-                u.email === credenciales.email && 
-                u.password === credenciales.password &&
-                u.activo !== false
-            );
-
-            if (usuario) {
-                this.state.usuarioActual = usuario;
-                this.guardarDatos('usuarioActual', usuario);
-                this.actualizarInterfaz();
-                this.mostrarNotificacion(`¡Bienvenido ${usuario.nombre}!`, 'success');
-
-                document.getElementById('loginModal').style.display = 'none';
-                return true;
-            } else {
-                throw new Error('Credenciales incorrectas o cuenta inactiva');
-            }
-        } catch (error) {
-            this.mostrarNotificacion(error.message, 'error');
-            return false;
-        } finally {
-            this.setLoading(false);
-        }
-    }
-
-    cerrarSesion() {
-        this.state.usuarioActual = null;
-        this.guardarDatos('usuarioActual', null);
-        this.actualizarInterfaz();
-        this.mostrarNotificacion('Sesión cerrada correctamente', 'info');
-    }
-
-    // ===== SISTEMA DE RESERVAS =====
-    seleccionarCancha(canchaId) {
-        const cancha = this.canchas.find(c => c.id === canchaId);
-        if (!cancha) {
-            this.mostrarNotificacion('Cancha no encontrada', 'error');
-            return;
-        }
-
-        this.state.canchaSeleccionada = cancha;
-
-        document.querySelectorAll('.cancha-item-lista').forEach(item => {
-            item.classList.remove('seleccionada');
-        });
-        const itemSeleccionado = document.querySelector(`.cancha-item-lista[data-id="${canchaId}"]`);
-        if (itemSeleccionado) {
-            itemSeleccionado.classList.add('seleccionada');
-        }
-
-        this.actualizarProgresoReserva(1);
-        this.actualizarCalendario();
-        this.mostrarResumenReserva();
-
-        document.getElementById('reservas')?.scrollIntoView({ 
-            behavior: 'smooth',
-            block: 'start'
-        });
-    }
-
-    seleccionarFecha(fecha) {
-        if (!this.validarFechaFutura(fecha)) {
-            this.mostrarNotificacion('No puedes reservar fechas pasadas', 'error');
-            return;
-        }
-
-        this.state.fechaSeleccionada = fecha;
-
-        document.querySelectorAll('.dia-calendario').forEach(dia => {
-            dia.classList.remove('seleccionado');
-        });
-        const diaSeleccionado = document.querySelector(`.dia-calendario[data-fecha="${fecha}"]`);
-        if (diaSeleccionado) {
-            diaSeleccionado.classList.add('seleccionado');
-        }
-
-        this.actualizarProgresoReserva(2);
-        this.actualizarSelectorHoras();
-        this.mostrarResumenReserva();
-    }
-
-    seleccionarHora(hora) {
-        if (!this.state.horaInicioSeleccionada) {
-            this.state.horaInicioSeleccionada = hora;
-            document.querySelectorAll('.hora-slot').forEach(h => h.classList.remove('seleccionado'));
-            const horaElemento = document.querySelector(`.hora-slot[data-hora="${hora}"]`);
-            if (horaElemento) horaElemento.classList.add('seleccionado');
-        } else if (!this.state.horaFinSeleccionada && hora > this.state.horaInicioSeleccionada) {
-
-            const disponible = this.verificarDisponibilidadRangoCompleto(
-                this.state.fechaSeleccionada,
-                this.state.canchaSeleccionada.id,
-                this.state.horaInicioSeleccionada,
-                hora
-            );
-
-            if (!disponible) {
-                this.mostrarNotificacion('Algunas horas en este rango ya están ocupadas', 'error');
-                return;
-            }
-
-            this.state.horaFinSeleccionada = hora;
-
-            for (let i = this.state.horaInicioSeleccionada; i < this.state.horaFinSeleccionada; i++) {
-                const horaElemento = document.querySelector(`.hora-slot[data-hora="${i}"]`);
-                if (horaElemento && !horaElemento.classList.contains('ocupado')) {
-                    horaElemento.classList.add('seleccionado');
-                }
-            }
-
-            this.actualizarProgresoReserva(3);
-        } else {
-            document.querySelectorAll('.hora-slot').forEach(h => h.classList.remove('seleccionado'));
-            this.state.horaInicioSeleccionada = hora;
-            this.state.horaFinSeleccionada = null;
-            const horaElemento = document.querySelector(`.hora-slot[data-hora="${hora}"]`);
-            if (horaElemento) horaElemento.classList.add('seleccionado');
-        }
-
-        this.actualizarInfoHoraSeleccion();
-        this.mostrarResumenReserva();
-    }
-
-    // ===== VERIFICACIÓN DE DISPONIBILIDAD =====
-    verificarDisponibilidad() {
-        if (!this.state.canchaSeleccionada || !this.state.fechaSeleccionada || 
-            !this.state.horaInicioSeleccionada || !this.state.horaFinSeleccionada) {
-            return false;
-        }
-
-        const reservaEditandoId = this.state.reservaEditando ? this.state.reservaEditando.id : null;
-
-        return !this.state.reservas.some(r => 
-            r.id !== reservaEditandoId &&
-            r.canchaId === this.state.canchaSeleccionada.id && 
-            r.fecha === this.state.fechaSeleccionada &&
-            r.estado === 'confirmada' &&
-            ((r.horaInicio < this.state.horaFinSeleccionada && r.horaFin > this.state.horaInicioSeleccionada))
-        );
-    }
-
-    verificarDisponibilidadRangoCompleto(fecha, canchaId, horaInicio, horaFin) {
-        for (let hora = horaInicio; hora < horaFin; hora++) {
-            if (this.estaHoraOcupada(fecha, canchaId, hora)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    estaHoraOcupada(fecha, canchaId, hora) {
-        return this.state.reservas.some(r => 
-            r.canchaId === canchaId && 
-            r.fecha === fecha &&
-            r.estado === 'confirmada' &&
-            hora >= r.horaInicio && hora < r.horaFin
-        );
-    }
-
-    async confirmarReserva(datosUsuario = null) {
-        this.setLoading(true);
-
-        try {
-            const usuario = datosUsuario || this.state.usuarioActual;
-            if (!usuario) {
-                throw new Error('Debes iniciar sesión o completar tus datos');
-            }
-
-            if (!this.validarReservaCompleta()) {
-                throw new Error('Completa todos los datos de la reserva');
-            }
-
-            if (!this.verificarDisponibilidad()) {
-                throw new Error('Lo sentimos, este horario ya no está disponible');
-            }
-
-            const reserva = this.crearReserva(usuario);
-
-            this.procesarReserva(reserva);
-
-            const cancha = this.canchas.find(c => c.id === reserva.canchaId);
-            await this.emailService.enviarConfirmacionUsuario(reserva, cancha);
-            await this.emailService.enviarNotificacionAdmin(reserva, cancha);
-
-            this.enviarWhatsAppReserva(reserva);
-
-            this.mostrarConfirmacionReserva(reserva);
-
-            this.resetearSistemaReservas();
-
-            return reserva;
-
-        } catch (error) {
-            this.mostrarNotificacion(error.message, 'error');
-            return null;
-        } finally {
-            this.setLoading(false);
-        }
-    }
-
-    crearReserva(usuario) {
-        const horas = this.state.horaFinSeleccionada - this.state.horaInicioSeleccionada;
-        const total = horas * this.state.canchaSeleccionada.precio;
-
-        return {
-            id: this.generarId(),
-            canchaId: this.state.canchaSeleccionada.id,
-            fecha: this.state.fechaSeleccionada,
-            horaInicio: this.state.horaInicioSeleccionada,
-            horaFin: this.state.horaFinSeleccionada,
-            usuario: usuario,
-            estado: "confirmada",
-            total: total,
-            timestamp: new Date().toISOString(),
-            codigoReserva: this.generarCodigoReserva(),
-            pagado: false
-        };
-    }
-
-    procesarReserva(reserva) {
-        this.state.reservas.push(reserva);
-        this.guardarDatos('reservas', this.state.reservas);
-
-        if (this.state.usuarioActual?.id) {
-            const usuarioIndex = this.state.usuarios.findIndex(u => u.id === this.state.usuarioActual.id);
-            if (usuarioIndex !== -1) {
-                if (!this.state.usuarios[usuarioIndex].reservas) {
-                    this.state.usuarios[usuarioIndex].reservas = [];
-                }
-                this.state.usuarios[usuarioIndex].reservas.push(reserva.id);
-                this.guardarDatos('usuarios', this.state.usuarios);
-            }
-        }
-    }
-
-    // ===== WHATSAPP =====
-    enviarWhatsAppReserva(reserva) {
-        const cancha = this.canchas.find(c => c.id === reserva.canchaId);
-        const horas = reserva.horaFin - reserva.horaInicio;
-        const telefonoAdmin = this.config.whatsappAdmin;
-
-        const mensaje = `📅 *NUEVA RESERVA - CANCHA RANGER* 📅
-
-🏟️ *Cancha:* ${cancha.nombre}
-👤 *Cliente:* ${reserva.usuario.nombre}
-📞 *Teléfono:* ${reserva.usuario.telefono}
-📧 *Email:* ${reserva.usuario.email}
-
-📆 *Fecha:* ${this.formatearFechaLegible(reserva.fecha)}
-⏰ *Horario:* ${reserva.horaInicio}:00 - ${reserva.horaFin}:00
-⏱️ *Duración:* ${horas} hora${horas > 1 ? 's' : ''}
-💰 *Total:* ${reserva.total} Bs
-
-🔢 *Código de Reserva:* ${reserva.codigoReserva}
-🆔 *ID Reserva:* ${reserva.id}
-
-⏰ *Reserva realizada:* ${new Date(reserva.timestamp).toLocaleString('es-ES')}
-
-_Reserva confirmada automáticamente por el sistema_`;
-
-        const mensajeCodificado = encodeURIComponent(mensaje);
-        const urlWhatsApp = `https://wa.me/${telefonoAdmin}?text=${mensajeCodificado}`;
-        window.open(urlWhatsApp, '_blank');
-
-        console.log('📱 WhatsApp preparado para:', telefonoAdmin);
-    }
-
-    enviarWhatsAppCancelacion(reserva) {
-        const cancha = this.canchas.find(c => c.id === reserva.canchaId);
-        const telefonoAdmin = this.config.whatsappAdmin;
-
-        const mensaje = `❌ *CANCELACIÓN DE RESERVA - CANCHA RANGER* ❌
-
-🏟️ *Cancha:* ${cancha.nombre}
-👤 *Cliente:* ${reserva.usuario.nombre}
-📞 *Teléfono:* ${reserva.usuario.telefono}
-
-📆 *Fecha:* ${this.formatearFechaLegible(reserva.fecha)}
-⏰ *Horario:* ${reserva.horaInicio}:00 - ${reserva.horaFin}:00
-
-🔢 *Código de Reserva:* ${reserva.codigoReserva}
-⏰ *Cancelado:* ${new Date().toLocaleString('es-ES')}
-
-_Reserva cancelada por el cliente_`;
-
-        const mensajeCodificado = encodeURIComponent(mensaje);
-        const urlWhatsApp = `https://wa.me/${telefonoAdmin}?text=${mensajeCodificado}`;
-        window.open(urlWhatsApp, '_blank');
-    }
-
-    // ===== GESTIÓN DE RESERVAS =====
-    obtenerReservasUsuario() {
-        if (!this.state.usuarioActual) return [];
-
-        return this.state.reservas
-            .filter(reserva => reserva.usuario.email === this.state.usuarioActual.email)
-            .sort((a, b) => new Date(b.fecha + 'T' + b.horaInicio + ':00') - new Date(a.fecha + 'T' + a.horaInicio + ':00'));
-    }
-
-    puedeModificarCancelar(reserva) {
-        const ahora = new Date();
-        const fechaReserva = new Date(reserva.fecha + 'T' + reserva.horaInicio + ':00');
-        const diferenciaHoras = (fechaReserva - ahora) / (1000 * 60 * 60);
-        
-        return diferenciaHoras >= this.config.tiempoCancelacion;
-    }
-
-    async cancelarReservaUsuario(reservaId) {
-        this.setLoading(true);
-
-        try {
-            const reservaIndex = this.state.reservas.findIndex(r => r.id === reservaId);
-            if (reservaIndex === -1) {
-                throw new Error('Reserva no encontrada');
-            }
-
-            const reserva = this.state.reservas[reservaIndex];
-
-            if (!this.puedeModificarCancelar(reserva)) {
-                throw new Error('No puedes cancelar la reserva. Debe ser al menos 12 horas antes.');
-            }
-
-            this.state.reservas[reservaIndex].estado = 'cancelada';
-            this.guardarDatos('reservas', this.state.reservas);
-
-            this.enviarWhatsAppCancelacion(reserva);
-
-            this.mostrarNotificacion('Reserva cancelada exitosamente', 'success');
-            this.actualizarInterfaz();
-
-            return true;
-
-        } catch (error) {
-            this.mostrarNotificacion(error.message, 'error');
-            return false;
-        } finally {
-            this.setLoading(false);
-        }
-    }
-
-        // ===== INTERFAZ Y COMPONENTES =====
+    // ===== INTERFAZ =====
     inicializarEventListeners() {
+        // Modales
         document.querySelectorAll('.close').forEach(closeBtn => {
             closeBtn.addEventListener('click', function() {
                 this.closest('.modal').style.display = 'none';
             });
         });
 
+        // Login/Registro
         document.getElementById('btnLogin')?.addEventListener('click', () => {
             document.getElementById('loginModal').style.display = 'block';
         });
@@ -582,18 +170,21 @@ _Reserva cancelada por el cliente_`;
             document.querySelector('.login-form').style.display = 'block';
         });
 
+        // Cerrar modal al hacer click fuera
         window.addEventListener('click', (e) => {
             if (e.target.classList.contains('modal')) {
                 e.target.style.display = 'none';
             }
         });
 
+        // Login
         document.getElementById('btnIniciarSesion')?.addEventListener('click', () => {
             const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPassword').value;
             this.iniciarSesion({ email, password });
         });
 
+        // Registro
         document.getElementById('btnRegistrarUsuario')?.addEventListener('click', () => {
             const usuario = {
                 nombre: document.getElementById('regNombre').value,
@@ -604,6 +195,12 @@ _Reserva cancelada por el cliente_`;
             this.registrarUsuario(usuario);
         });
 
+        // Logout
+        document.getElementById('btnLogout')?.addEventListener('click', () => {
+            this.cerrarSesion();
+        });
+
+        // Navegación suave
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 e.preventDefault();
@@ -619,11 +216,13 @@ _Reserva cancelada por el cliente_`;
     }
 
     inicializarComponentes() {
+        // Inicializar grid de canchas
         const canchasGrid = document.getElementById('canchasGrid');
         if (canchasGrid) {
             canchasGrid.innerHTML = this.generarHTMLCanchas();
         }
 
+        // Inicializar lista de canchas en sidebar
         const canchasLista = document.getElementById('canchasLista');
         if (canchasLista) {
             canchasLista.innerHTML = this.generarHTMLListaCanchas();
@@ -634,8 +233,6 @@ _Reserva cancelada por el cliente_`;
 
     actualizarInterfaz() {
         this.actualizarEstadoUsuario();
-        this.actualizarCalendario();
-        this.actualizarEstadoTiempoReal();
     }
 
     actualizarEstadoUsuario() {
@@ -714,7 +311,7 @@ _Reserva cancelada por el cliente_`;
 
     generarHTMLListaCanchas() {
         return this.canchas.map(cancha => `
-            <div class="cancha-item-lista ${this.state.canchaSeleccionada?.id === cancha.id ? 'seleccionada' : ''}" 
+            <div class="cancha-item-lista" 
                  data-id="${cancha.id}" 
                  onclick="sistema.seleccionarCancha(${cancha.id})">
                 <div class="cancha-lista-imagen">
@@ -783,13 +380,114 @@ _Reserva cancelada por el cliente_`;
         modal.style.display = 'block';
     }
 
-    // ===== FUNCIONES AUXILIARES =====
+    // ===== SISTEMA DE RESERVAS =====
+    seleccionarCancha(canchaId) {
+        const cancha = this.canchas.find(c => c.id === canchaId);
+        if (!cancha) {
+            this.mostrarNotificacion('Cancha no encontrada', 'error');
+            return;
+        }
+
+        this.state.canchaSeleccionada = cancha;
+        
+        // Actualizar UI
+        document.querySelectorAll('.cancha-item-lista').forEach(item => {
+            item.classList.remove('seleccionada');
+        });
+        document.querySelector(`.cancha-item-lista[data-id="${canchaId}"]`)?.classList.add('seleccionada');
+
+        this.mostrarNotificacion(`Cancha ${cancha.nombre} seleccionada`, 'success');
+        
+        // Scroll a reservas
+        document.getElementById('reservas')?.scrollIntoView({ 
+            behavior: 'smooth',
+            block: 'start'
+        });
+    }
+
+    // ===== USUARIOS =====
+    async registrarUsuario(datosUsuario) {
+        this.setLoading(true);
+        try {
+            if (!this.validarEmail(datosUsuario.email)) {
+                throw new Error('El formato del email es inválido');
+            }
+            if (!this.validarTelefono(datosUsuario.telefono)) {
+                throw new Error('El formato del teléfono es inválido');
+            }
+            if (datosUsuario.password.length < 6) {
+                throw new Error('La contraseña debe tener al menos 6 caracteres');
+            }
+            if (this.state.usuarios.find(u => u.email === datosUsuario.email)) {
+                throw new Error('Este email ya está registrado');
+            }
+
+            const nuevoUsuario = {
+                id: this.generarId(),
+                ...datosUsuario,
+                fechaRegistro: new Date().toISOString(),
+                reservas: [],
+                activo: true
+            };
+
+            this.state.usuarios.push(nuevoUsuario);
+            this.guardarDatos('usuarios', this.state.usuarios);
+            this.iniciarSesion(nuevoUsuario);
+
+            this.mostrarNotificacion(`¡Cuenta creada exitosamente! Bienvenido ${datosUsuario.nombre}`, 'success');
+            return true;
+
+        } catch (error) {
+            this.mostrarNotificacion(error.message, 'error');
+            return false;
+        } finally {
+            this.setLoading(false);
+        }
+    }
+
+    async iniciarSesion(credenciales) {
+        this.setLoading(true);
+        try {
+            const usuario = this.state.usuarios.find(u => 
+                u.email === credenciales.email && 
+                u.password === credenciales.password &&
+                u.activo !== false
+            );
+
+            if (usuario) {
+                this.state.usuarioActual = usuario;
+                this.guardarDatos('usuarioActual', usuario);
+                this.actualizarInterfaz();
+                this.mostrarNotificacion(`¡Bienvenido ${usuario.nombre}!`, 'success');
+                document.getElementById('loginModal').style.display = 'none';
+                return true;
+            } else {
+                throw new Error('Credenciales incorrectas');
+            }
+        } catch (error) {
+            this.mostrarNotificacion(error.message, 'error');
+            return false;
+        } finally {
+            this.setLoading(false);
+        }
+    }
+
+    cerrarSesion() {
+        this.state.usuarioActual = null;
+        this.guardarDatos('usuarioActual', null);
+        this.actualizarInterfaz();
+        this.mostrarNotificacion('Sesión cerrada correctamente', 'info');
+    }
+
+    // ===== UTILIDADES =====
     setLoading(estado) {
         this.state.isLoading = estado;
     }
 
     mostrarNotificacion(mensaje, tipo = 'info') {
         console.log(`[${tipo.toUpperCase()}] ${mensaje}`);
+        // En un sistema real, aquí mostrarías un toast
+        alert(`[${tipo.toUpperCase()}] ${mensaje}`);
     }
 
     validarEmail(email) {
@@ -800,11 +498,6 @@ _Reserva cancelada por el cliente_`;
     validarTelefono(telefono) {
         const regex = /^[0-9]{8,15}$/;
         return regex.test(telefono);
-    }
-
-    validarFechaFutura(fecha) {
-        const hoy = new Date().toISOString().split('T')[0];
-        return fecha >= hoy;
     }
 
     generarId() {
@@ -818,95 +511,6 @@ _Reserva cancelada por el cliente_`;
     formatearFechaISO(fecha) {
         return fecha.toISOString().split('T')[0];
     }
-
-    formatearFechaLegible(fecha) {
-        const opciones = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-        return new Date(fecha).toLocaleDateString('es-ES', opciones);
-    }
-
-    actualizarProgresoReserva(paso) {
-        const steps = document.querySelectorAll('.progress-step');
-        steps.forEach((step, index) => {
-            if (index + 1 <= paso) {
-                step.classList.add('active');
-            } else {
-                step.classList.remove('active');
-            }
-        });
-    }
-
-    actualizarCalendario() {
-        console.log('Calendario actualizado');
-    }
-
-    actualizarSelectorHoras() {
-        console.log('Selector de horas actualizado');
-    }
-
-    actualizarInfoHoraSeleccion() {
-        console.log('Info de hora actualizada');
-    }
-
-    mostrarResumenReserva() {
-        console.log('Resumen de reserva mostrado');
-    }
-
-    mostrarConfirmacionReserva(reserva) {
-        this.mostrarNotificacion(`¡Reserva confirmada! Código: ${reserva.codigoReserva}`, 'success');
-    }
-
-    resetearSistemaReservas() {
-        this.state.canchaSeleccionada = null;
-        this.state.fechaSeleccionada = null;
-        this.state.horaInicioSeleccionada = null;
-        this.state.horaFinSeleccionada = null;
-        this.state.reservaEditando = null;
-        
-        this.actualizarInterfaz();
-        this.mostrarNotificacion('Sistema de reservas reiniciado', 'info');
-    }
-
-    validarReservaCompleta() {
-        return this.state.canchaSeleccionada && 
-               this.state.fechaSeleccionada && 
-               this.state.horaInicioSeleccionada && 
-               this.state.horaFinSeleccionada;
-    }
-
-    iniciarActualizacionTiempoReal() {
-        setInterval(() => {
-            this.actualizarEstadoTiempoReal();
-        }, 30000);
-    }
-
-    actualizarEstadoTiempoReal() {
-        const estadoCanchas = document.getElementById('estadoCanchas');
-        if (estadoCanchas) {
-            estadoCanchas.innerHTML = this.canchas.map(cancha => `
-                <div class="estado-cancha-item">
-                    <span class="cancha-nombre">${cancha.nombre}</span>
-                    <span class="estado ${cancha.estado}">${cancha.estado}</span>
-                </div>
-            `).join('');
-        }
-    }
-}
-
-// ===== CLASES AUXILIARES =====
-class WhatsAppService {
-    init() {
-        console.log('WhatsApp Service inicializado');
-    }
-}
-
-class EmailService {
-    async enviarConfirmacionUsuario(reserva, cancha) {
-        console.log('Email de confirmación enviado al usuario:', reserva.usuario.email);
-    }
-    
-    async enviarNotificacionAdmin(reserva, cancha) {
-        console.log('Notificación enviada al administrador');
-    }
 }
 
 // ===== INICIALIZACIÓN GLOBAL =====
@@ -915,3 +519,12 @@ let sistema;
 document.addEventListener('DOMContentLoaded', function() {
     sistema = new SistemaCanchaRanger();
 });
+
+// Funciones globales para onclick
+function mostrarDetallesCancha(canchaId) {
+    sistema.mostrarDetallesCancha(canchaId);
+}
+
+function seleccionarCancha(canchaId) {
+    sistema.seleccionarCancha(canchaId);
+}
