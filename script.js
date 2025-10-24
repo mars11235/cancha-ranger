@@ -26,7 +26,9 @@ class SistemaCanchaRanger {
                 nombre: "Cancha 1 Wally",
                 tipo: "Voleibol",
                 precio: this.config.precioWally,
-                imagen: "cancha1.jpg"     
+                imagen: "https://images.unsplash
+
+.com/photo-1622279457486-62dcc4a43134?w=400" 
                 descripcion: "Cancha profesional de voleibol con medidas oficiales.",
                 caracteristicas: ["Iluminación profesional", "Piso de madera", "Red profesional"],
                 estado: "disponible",
