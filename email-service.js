@@ -28,8 +28,8 @@ class EmailService {
             cliente_nombre: reserva.usuario.nombre,
             cliente_telefono: reserva.usuario.telefono,
             politicas_cancelacion: 'Puedes modificar o cancelar tu reserva hasta 12 horas antes del horario programado sin costo alguno.',
-            contacto_telefono1: '73811600',
-            contacto_telefono2: '73220922',
+            contacto_telefono1: '73314651',
+            contacto_telefono2: '68308965',
             contacto_operadora: 'Lurdes Córdova',
             contacto_ubicacion: 'Calle 9 de abril entre Ejercito y Murillo Dorado'
         };

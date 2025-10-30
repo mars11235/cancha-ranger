@@ -2,7 +2,7 @@
 class WhatsAppService {
     constructor() {
         this.config = {
-            adminNumber: '59173811600', // TU NÚMERO
+            adminNumber: '59173314651', // TU NÚMERO
             businessNumber: '59173220922', // Número de la empresa
             defaultMessage: '¡Hola! Quiero hacer una reserva en Cancha Ranger'
         };
