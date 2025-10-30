@@ -186,10 +186,111 @@ Tu partido es en *${tipo}*
         console.log(`🔔 Notificaciones ${activo ? 'activadas' : 'desactivadas'}`);
     }
 
+    // ===== BOTÓN FLOTANTE WHATSAPP =====
+    crearBotonFlotanteWhatsApp() {
+        // Verificar si ya existe el botón
+        if (document.querySelector('.whatsapp-flotante')) {
+            return;
+        }
+
+        const botonWhatsApp = document.createElement('div');
+        botonWhatsApp.className = 'whatsapp-flotante';
+        botonWhatsApp.innerHTML = `
+            <a href="${this.generarEnlaceConsultaRapida()}" target="_blank" class="whatsapp-link">
+                <i class="fab fa-whatsapp"></i>
+                <span>Reservar por WhatsApp</span>
+            </a>
+        `;
+        
+        document.body.appendChild(botonWhatsApp);
+        return botonWhatsApp;
+    }
+
+    // ===== BOTONES WHATSAPP EN CANCHAS =====
+    agregarBotonesWhatsAppCanchas() {
+        const canchasGrid = document.getElementById('canchasGrid');
+        if (!canchasGrid) return;
+
+        // Agregar botón WhatsApp a cada cancha
+        document.querySelectorAll('.cancha-card-profesional').forEach((card, index) => {
+            const cancha = window.sistema?.canchas[index];
+            if (!cancha) return;
+
+            // Verificar si ya existe el botón
+            if (card.querySelector('.btn-whatsapp-cancha')) {
+                return;
+            }
+
+            const botonWhatsApp = document.createElement('button');
+            botonWhatsApp.className = 'btn-whatsapp-cancha';
+            botonWhatsApp.innerHTML = `
+                <i class="fab fa-whatsapp"></i>
+                WhatsApp
+            `;
+            
+            botonWhatsApp.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const url = this.generarEnlaceConsultaRapida(cancha.id);
+                window.open(url, '_blank');
+            });
+
+            const acciones = card.querySelector('.cancha-actions');
+            if (acciones) {
+                acciones.appendChild(botonWhatsApp);
+            }
+        });
+    }
+
+    // ===== GENERAR ENLACES WHATSAPP =====
+    generarEnlaceConsultaRapida(canchaId = null) {
+        let mensaje = this.config.defaultMessage;
+        
+        if (canchaId && window.sistema) {
+            const cancha = window.sistema.canchas.find(c => c.id === canchaId);
+            if (cancha) {
+                mensaje = `¡Hola! Estoy interesado en reservar la *${cancha.nombre}*.\n\n• Precio: ${cancha.precio} Bs/hora\n• Tipo: ${cancha.tipo}\n\n¿Podrían indicarme disponibilidad y proceso de reserva?`;
+            }
+        }
+        
+        const mensajeCodificado = encodeURIComponent(mensaje);
+        return `https://wa.me/${this.config.businessNumber}?text=${mensajeCodificado}`;
+    }
+
+    generarEnlaceReservaDirecta(datosReserva = null) {
+        let mensaje = this.config.defaultMessage;
+        
+        if (datosReserva) {
+            const { cancha, fecha, horaInicio, horaFin, nombre, telefono } = datosReserva;
+            const horas = horaFin - horaInicio;
+            const total = horas * cancha.precio;
+            
+            mensaje = `📅 *SOLICITUD DE RESERVA - CANCHA RANGER* 📅
+
+🏟️ *Cancha de interés:* ${cancha.nombre}
+👤 *Nombre:* ${nombre}
+📞 *Teléfono:* ${telefono}
+
+📆 *Fecha preferida:* ${this.formatearFechaLegible(fecha)}
+⏰ *Horario preferido:* ${horaInicio}:00 - ${horaFin}:00
+⏱️ *Duración:* ${horas} hora${horas > 1 ? 's' : ''}
+💰 *Total estimado:* ${total} Bs
+
+💬 *Mensaje:* Por favor confirmen disponibilidad y procedimiento de pago.`;
+        }
+        
+        const mensajeCodificado = encodeURIComponent(mensaje);
+        return `https://wa.me/${this.config.adminNumber}?text=${mensajeCodificado}`;
+    }
+
     // ===== INICIALIZACIÓN =====
     init() {
         console.log('📱 Servicio de WhatsApp inicializado - Notificaciones activas');
         this.crearBotonFlotanteWhatsApp();
+        
+        // Esperar a que carguen las canchas para agregar botones
+        setTimeout(() => {
+            this.agregarBotonesWhatsAppCanchas();
+        }, 2000);
         
         // Verificar cada 30 segundos si hay nuevas reservas pendientes de notificación
         setInterval(() => {
