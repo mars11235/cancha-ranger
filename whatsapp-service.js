@@ -38,11 +38,14 @@ class WhatsAppService {
     }
 
     // Generar enlace para consulta rápida
-    generarEnlaceConsultaRapida(cancha = null) {
+    generarEnlaceConsultaRapida(canchaId = null) {
         let mensaje = this.config.defaultMessage;
         
-        if (cancha) {
-            mensaje = `¡Hola! Estoy interesado en reservar la *${cancha.nombre}*.\n\n• Precio: ${cancha.precio} Bs/hora\n• Tipo: ${cancha.tipo}\n\n¿Podrían indicarme disponibilidad y proceso de reserva?`;
+        if (canchaId && window.sistema) {
+            const cancha = window.sistema.canchas.find(c => c.id === canchaId);
+            if (cancha) {
+                mensaje = `¡Hola! Estoy interesado en reservar la *${cancha.nombre}*.\n\n• Precio: ${cancha.precio} Bs/hora\n• Tipo: ${cancha.tipo}\n\n¿Podrían indicarme disponibilidad y proceso de reserva?`;
+            }
         }
         
         const mensajeCodificado = encodeURIComponent(mensaje);
@@ -51,7 +54,12 @@ class WhatsAppService {
 
     // Enviar notificación de nueva reserva (ya existente)
     enviarNotificacionReserva(reserva) {
-        const cancha = sistema.canchas.find(c => c.id === reserva.canchaId);
+        if (!window.sistema) {
+            console.error('Sistema no disponible');
+            return;
+        }
+
+        const cancha = window.sistema.canchas.find(c => c.id === reserva.canchaId);
         const horas = reserva.horaFin - reserva.horaInicio;
         
         const mensaje = `📅 *NUEVA RESERVA - CANCHA RANGER* 📅
@@ -61,7 +69,7 @@ class WhatsAppService {
 📞 *Teléfono:* ${reserva.usuario.telefono}
 📧 *Email:* ${reserva.usuario.email}
 
-📆 *Fecha:* ${sistema.formatearFechaLegible(reserva.fecha)}
+📆 *Fecha:* ${this.formatearFechaLegible(reserva.fecha)}
 ⏰ *Horario:* ${reserva.horaInicio}:00 - ${reserva.horaFin}:00
 ⏱️ *Duración:* ${horas} hora${horas > 1 ? 's' : ''}
 💰 *Total:* ${reserva.total} Bs
@@ -82,7 +90,12 @@ _Reserva confirmada automáticamente por el sistema_`;
 
     // Enviar confirmación al cliente
     enviarConfirmacionCliente(reserva) {
-        const cancha = sistema.canchas.find(c => c.id === reserva.canchaId);
+        if (!window.sistema) {
+            console.error('Sistema no disponible');
+            return;
+        }
+
+        const cancha = window.sistema.canchas.find(c => c.id === reserva.canchaId);
         const horas = reserva.horaFin - reserva.horaInicio;
         
         const mensaje = `✅ *RESERVA CONFIRMADA - CANCHA RANGER* ✅
@@ -90,7 +103,7 @@ _Reserva confirmada automáticamente por el sistema_`;
 ¡Hola ${reserva.usuario.nombre}! Tu reserva ha sido confirmada:
 
 🏟️ *Cancha:* ${cancha?.nombre}
-📆 *Fecha:* ${sistema.formatearFechaLegible(reserva.fecha)}
+📆 *Fecha:* ${this.formatearFechaLegible(reserva.fecha)}
 ⏰ *Horario:* ${reserva.horaInicio}:00 - ${reserva.horaFin}:00
 ⏱️ *Duración:* ${horas} hora${horas > 1 ? 's' : ''}
 💰 *Total a pagar:* ${reserva.total} Bs
@@ -118,6 +131,11 @@ _Reserva confirmada automáticamente por el sistema_`;
     
     // Crear botón flotante de WhatsApp
     crearBotonFlotanteWhatsApp() {
+        // Verificar si ya existe el botón
+        if (document.querySelector('.whatsapp-flotante')) {
+            return;
+        }
+
         const botonWhatsApp = document.createElement('div');
         botonWhatsApp.className = 'whatsapp-flotante';
         botonWhatsApp.innerHTML = `
@@ -138,19 +156,24 @@ _Reserva confirmada automáticamente por el sistema_`;
 
         // Agregar botón WhatsApp a cada cancha
         document.querySelectorAll('.cancha-card-profesional').forEach((card, index) => {
-            const cancha = sistema.canchas[index];
+            const cancha = window.sistema?.canchas[index];
             if (!cancha) return;
+
+            // Verificar si ya existe el botón
+            if (card.querySelector('.btn-whatsapp-cancha')) {
+                return;
+            }
 
             const botonWhatsApp = document.createElement('button');
             botonWhatsApp.className = 'btn-whatsapp-cancha';
             botonWhatsApp.innerHTML = `
                 <i class="fab fa-whatsapp"></i>
-                Consultar por WhatsApp
+                WhatsApp
             `;
             
             botonWhatsApp.addEventListener('click', (e) => {
                 e.stopPropagation();
-                const url = this.generarEnlaceConsultaRapida(cancha);
+                const url = this.generarEnlaceConsultaRapida(cancha.id);
                 window.open(url, '_blank');
             });
 
@@ -175,9 +198,11 @@ _Reserva confirmada automáticamente por el sistema_`;
     // Inicializar servicio de WhatsApp
     init() {
         this.crearBotonFlotanteWhatsApp();
+        
+        // Esperar a que el sistema cargue las canchas
         setTimeout(() => {
             this.agregarBotonesWhatsAppCanchas();
-        }, 1000);
+        }, 2000);
         
         console.log('📱 Servicio de WhatsApp inicializado');
     }
