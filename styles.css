@@ -1869,3 +1869,236 @@ section {
     gap: 10px;
     margin-top: 15px;
 }
+
+/* ===== SELECTOR DE FECHA MODERNO ===== */
+.selector-fecha-moderno {
+    background: var(--secondary-color);
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    margin-bottom: 2rem;
+    border: 1px solid var(--border-color);
+}
+
+.selector-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.selector-header h4 {
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+.fecha-hoy {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+}
+
+.fecha-hoy:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.input-fecha-container {
+    margin-bottom: 1.5rem;
+    position: relative;
+}
+
+.input-fecha-container label {
+    display: block;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.input-fecha-moderno {
+    width: 100%;
+    padding: 1rem;
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius-sm);
+    background: var(--bg-card);
+    color: var(--text-primary);
+    font-size: 1rem;
+    font-family: inherit;
+    transition: var(--transition);
+}
+
+.input-fecha-moderno:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(139, 0, 0, 0.1);
+}
+
+/* Fechas Rápidas */
+.fechas-rapidas {
+    margin-bottom: 1.5rem;
+}
+
+.fechas-rapidas h5 {
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+}
+
+.botones-fechas-rapidas {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 0.8rem;
+}
+
+.btn-fecha-rapida {
+    background: var(--bg-card);
+    border: 2px solid var(--border-color);
+    color: var(--text-secondary);
+    padding: 1rem 0.8rem;
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+}
+
+.btn-fecha-rapida:hover {
+    border-color: var(--primary-color);
+    color: var(--text-primary);
+    transform: translateY(-2px);
+}
+
+.btn-fecha-rapida.active {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+}
+
+/* Próximos Días */
+.proximos-dias h5 {
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+}
+
+.lista-dias {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.dia-item {
+    background: var(--bg-card);
+    border: 2px solid var(--border-color);
+    padding: 1rem;
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.dia-item:hover {
+    border-color: var(--primary-color);
+    transform: translateX(5px);
+}
+
+.dia-item.seleccionado {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+}
+
+.dia-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.dia-fecha {
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.dia-nombre {
+    font-size: 0.8rem;
+    color: inherit;
+    opacity: 0.8;
+}
+
+.dia-disponibilidad {
+    font-size: 0.7rem;
+    padding: 0.3rem 0.6rem;
+    border-radius: 12px;
+    background: var(--success-color);
+    color: white;
+    font-weight: 600;
+}
+
+.dia-disponibilidad.ocupado {
+    background: var(--error-color);
+}
+
+.dia-disponibilidad.limitado {
+    background: var(--warning-color);
+    color: black;
+}
+
+/* Estilos para el input date nativo */
+input[type="date"] {
+    position: relative;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+    background: transparent;
+    bottom: 0;
+    color: transparent;
+    cursor: pointer;
+    height: auto;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: auto;
+}
+
+.input-fecha-container::after {
+    content: "📅";
+    position: absolute;
+    right: 15px;
+    top: 65%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    font-size: 1.2rem;
+    background: var(--primary-color);
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}

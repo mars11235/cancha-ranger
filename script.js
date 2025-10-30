@@ -298,30 +298,7 @@ class SistemaCanchaRanger {
             });
         });
 
-        // Calendario - CORREGIDO
-        document.getElementById('prev-mes')?.addEventListener('click', () => {
-            this.mesActual--;
-            if (this.mesActual < 0) {
-                this.mesActual = 11;
-                this.añoActual--;
-            }
-            this.generarCalendario();
-        });
-
-        document.getElementById('next-mes')?.addEventListener('click', () => {
-            this.mesActual++;
-            if (this.mesActual > 11) {
-                this.mesActual = 0;
-                this.añoActual++;
-            }
-            this.generarCalendario();
-        });
-
-        // Filtro de horario
-        document.getElementById('filtroHorario')?.addEventListener('change', (e) => {
-            this.state.filtroHorario = e.target.value;
-            this.actualizarHorarios();
-        });
+        
 
         // Menú hamburguesa
         const hamburger = document.querySelector('.hamburger');
@@ -339,16 +316,156 @@ class SistemaCanchaRanger {
                 navMenu?.classList.remove('active');
             });
         });
+
+        
+
+        
     }
 
-    inicializarComponentes() {
-        this.generarHTMLCanchas();
-        this.generarHTMLListaCanchas();
-        this.generarCalendario(); // CORREGIDO - Ahora se llama correctamente
-        this.actualizarHorarios();
-        this.actualizarEstadoTiempoReal();
-        this.mostrarResumenReserva();
+    // ===== SISTEMA DE FECHA MODERNO =====
+inicializarSelectorFecha() {
+    const fechaInput = document.getElementById('fechaReserva');
+    const fechaHoy = document.getElementById('fechaHoy');
+    const botonesRapidos = document.querySelectorAll('.btn-fecha-rapida');
+    
+    // Establecer fecha mínima como hoy
+    const hoy = new Date();
+    const hoyStr = hoy.toISOString().split('T')[0];
+    fechaInput.min = hoyStr;
+    
+    // Establecer fecha por defecto como hoy
+    fechaInput.value = hoyStr;
+    
+    // Evento para input de fecha
+    fechaInput.addEventListener('change', (e) => {
+        this.seleccionarFecha(e.target.value);
+        this.actualizarBotonesRapidos(this.calcularDiasDesdeHoy(e.target.value));
+        this.generarListaProximosDias();
+    });
+    
+    // Botón "Hoy"
+    fechaHoy.addEventListener('click', () => {
+        this.seleccionarFecha(hoyStr);
+        fechaInput.value = hoyStr;
+        this.actualizarBotonesRapidos(0);
+        this.generarListaProximosDias();
+    });
+    
+    // Botones rápidos
+    botonesRapidos.forEach(boton => {
+        boton.addEventListener('click', () => {
+            const dias = parseInt(boton.dataset.dias);
+            const fecha = new Date();
+            fecha.setDate(fecha.getDate() + dias);
+            const fechaStr = fecha.toISOString().split('T')[0];
+            
+            this.seleccionarFecha(fechaStr);
+            fechaInput.value = fechaStr;
+            this.actualizarBotonesRapidos(dias);
+            this.generarListaProximosDias();
+        });
+    });
+    
+    // Generar lista de próximos días
+    this.generarListaProximosDias();
+}
+
+generarListaProximosDias() {
+    const listaDias = document.getElementById('listaDias');
+    if (!listaDias) return;
+    
+    let html = '';
+    const hoy = new Date();
+    
+    for (let i = 0; i < 7; i++) {
+        const fecha = new Date();
+        fecha.setDate(hoy.getDate() + i);
+        const fechaStr = fecha.toISOString().split('T')[0];
+        const nombreDia = fecha.toLocaleDateString('es-ES', { weekday: 'long' });
+        const numeroDia = fecha.getDate();
+        const mes = fecha.toLocaleDateString('es-ES', { month: 'short' });
+        
+        // Verificar disponibilidad
+        const disponible = this.verificarDisponibilidadFecha(fechaStr);
+        const estaSeleccionado = this.state.fechaSeleccionada === fechaStr;
+        
+        let textoDisponibilidad = 'Disponible';
+        let claseDisponibilidad = 'disponible';
+        
+        if (!disponible) {
+            textoDisponibilidad = 'Ocupado';
+            claseDisponibilidad = 'ocupado';
+        } else if (i === 0) {
+            textoDisponibilidad = 'Hoy';
+        } else if (i === 1) {
+            textoDisponibilidad = 'Mañana';
+        }
+        
+        html += `
+            <div class="dia-item ${estaSeleccionado ? 'seleccionado' : ''}" 
+                 onclick="sistema.seleccionarFechaDesdeLista('${fechaStr}')">
+                <div class="dia-info">
+                    <span class="dia-fecha">${numeroDia} ${mes}</span>
+                    <span class="dia-nombre">${nombreDia.charAt(0).toUpperCase() + nombreDia.slice(1)}</span>
+                </div>
+                <span class="dia-disponibilidad ${claseDisponibilidad}">
+                    ${textoDisponibilidad}
+                </span>
+            </div>
+        `;
     }
+    
+    listaDias.innerHTML = html;
+}
+
+seleccionarFechaDesdeLista(fecha) {
+    this.seleccionarFecha(fecha);
+    document.getElementById('fechaReserva').value = fecha;
+    this.actualizarBotonesRapidos(this.calcularDiasDesdeHoy(fecha));
+    this.generarListaProximosDias();
+}
+
+actualizarBotonesRapidos(diasSeleccionados) {
+    document.querySelectorAll('.btn-fecha-rapida').forEach(boton => {
+        const dias = parseInt(boton.dataset.dias);
+        if (dias === diasSeleccionados) {
+            boton.classList.add('active');
+        } else {
+            boton.classList.remove('active');
+        }
+    });
+}
+
+calcularDiasDesdeHoy(fecha) {
+    const hoy = new Date().toISOString().split('T')[0];
+    const fechaObj = new Date(fecha);
+    const hoyObj = new Date(hoy);
+    const diffTime = fechaObj - hoyObj;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
+}
+
+verificarDisponibilidadFecha(fecha) {
+    if (!this.state.canchaSeleccionada) return true;
+    
+    const reservasEnFecha = this.state.reservas.filter(r => 
+        r.fecha === fecha && 
+        r.canchaId === this.state.canchaSeleccionada.id &&
+        r.estado === 'confirmada'
+    );
+    
+    // Considerar que una cancha tiene múltiples horarios disponibles
+    return reservasEnFecha.length < 8; // Máximo 8 reservas por día (de 14:00 a 22:00)
+}
+
+    inicializarComponentes() {
+    this.generarHTMLCanchas();
+    this.generarHTMLListaCanchas();
+    this.inicializarSelectorFecha(); // REEMPLAZA: this.generarCalendario()
+    this.actualizarHorarios();
+    this.actualizarEstadoTiempoReal();
+    this.mostrarResumenReserva();
+}
 
     actualizarInterfaz() {
         this.actualizarEstadoUsuario();

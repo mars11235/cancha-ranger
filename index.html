@@ -314,106 +314,101 @@
                     </div>
                 </div>
 
-                <!-- Panel Principal de Reservas -->
-                <div class="reserva-main">
-                    <div class="reserva-header">
-                        <h3><i class="fas fa-calendar-alt"></i> Sistema de Reservas</h3>
-                        <p>Selecciona cancha, fecha y horario para tu partido</p>
-                        <div class="reserva-progress">
-                            <div class="progress-step active" data-step="1">
-                                <span>1</span>
-                                Cancha
-                            </div>
-                            <div class="progress-step" data-step="2">
-                                <span>2</span>
-                                Fecha
-                            </div>
-                            <div class="progress-step" data-step="3">
-                                <span>3</span>
-                                Horario
-                            </div>
-                            <div class="progress-step" data-step="4">
-                                <span>4</span>
-                                Confirmar
-                            </div>
-                        </div>
-                    </div>
+                <!-- Selector de Fecha Moderno -->
+<div class="selector-fecha-moderno">
+    <div class="selector-header">
+        <h4><i class="fas fa-calendar-day"></i> Selecciona la Fecha</h4>
+        <div class="fecha-hoy" id="fechaHoy">
+            <i class="fas fa-bolt"></i> Hoy
+        </div>
+    </div>
+    
+    <div class="input-fecha-container">
+        <div class="form-group">
+            <label for="fechaReserva"><i class="fas fa-calendar-alt"></i> Fecha de Reserva</label>
+            <input type="date" id="fechaReserva" min="" class="input-fecha-moderno">
+        </div>
+    </div>
 
-                    <!-- Calendario Interactivo -->
-                    <div class="calendario-profesional">
-                        <div class="calendario-header">
-                            <button id="prev-mes" class="btn-calendario" title="Mes anterior">
-                                <i class="fas fa-chevron-left"></i>
-                            </button>
-                            <h4 id="mes-actual">Octubre 2025</h4>
-                            <button id="next-mes" class="btn-calendario" title="Mes siguiente">
-                                <i class="fas fa-chevron-right"></i>
-                            </button>
-                        </div>
+    <!-- Selector Rápido de Fechas -->
+    <div class="fechas-rapidas">
+        <h5><i class="fas fa-rocket"></i> Fechas Rápidas</h5>
+        <div class="botones-fechas-rapidas">
+            <button class="btn-fecha-rapida" data-dias="0">
+                <i class="fas fa-sun"></i>
+                <span>Hoy</span>
+            </button>
+            <button class="btn-fecha-rapida" data-dias="1">
+                <i class="fas fa-forward"></i>
+                <span>Mañana</span>
+            </button>
+            <button class="btn-fecha-rapida" data-dias="3">
+                <i class="fas fa-calendar-plus"></i>
+                <span>En 3 días</span>
+            </button>
+            <button class="btn-fecha-rapida" data-dias="7">
+                <i class="fas fa-calendar-week"></i>
+                <span>En 1 semana</span>
+            </button>
+        </div>
+    </div>
 
-                        <div class="dias-semana-profesional">
-                            <div>Lun</div>
-                            <div>Mar</div>
-                            <div>Mié</div>
-                            <div>Jue</div>
-                            <div>Vie</div>
-                            <div>Sáb</div>
-                            <div>Dom</div>
-                        </div>
+    <!-- Próximos Días Disponibles -->
+    <div class="proximos-dias" id="proximosDias">
+        <h5><i class="fas fa-list"></i> Próximos Días Disponibles</h5>
+        <div class="lista-dias" id="listaDias">
+            <!-- Se llena dinámicamente -->
+        </div>
+    </div>
+</div>
 
-                        <div class="dias-mes-profesional" id="diasMes">
-                            <!-- Días generados dinámicamente -->
-                        </div>
-                    </div>
+<!-- Selector de Horarios -->
+<div class="horarios-profesional">
+    <div class="horarios-header">
+        <h4><i class="fas fa-clock"></i> Horarios Disponibles (2:00 PM - 10:00 PM)</h4>
+        <div class="horario-info">
+            <span class="hora-seleccion-info" id="horaSeleccionInfo">
+                Selecciona rango de horas
+            </span>
+        </div>
+    </div>
+    <div class="horarios-grid-profesional" id="horariosGrid">
+        <!-- Horarios generados dinámicamente -->
+    </div>
+    <div class="horarios-leyenda">
+        <div class="leyenda-item">
+            <span class="indicador disponible"></span>
+            Disponible
+        </div>
+        <div class="leyenda-item">
+            <span class="indicador seleccionado"></span>
+            Seleccionado
+        </div>
+        <div class="leyenda-item">
+            <span class="indicador ocupado"></span>
+            Ocupado
+        </div>
+    </div>
+</div>
 
-                    <!-- Selector de Horarios -->
-                    <div class="horarios-profesional">
-                        <div class="horarios-header">
-                            <h4><i class="fas fa-clock"></i> Horarios Disponibles (2:00 PM - 10:00 PM)</h4>
-                            <div class="horario-info">
-                                <span class="hora-seleccion-info" id="horaSeleccionInfo">
-                                    Selecciona rango de horas
-                                </span>
-                            </div>
-                        </div>
-                        <div class="horarios-grid-profesional" id="horariosGrid">
-                            <!-- Horarios generados dinámicamente -->
-                        </div>
-                        <div class="horarios-leyenda">
-                            <div class="leyenda-item">
-                                <span class="indicador disponible"></span>
-                                Disponible
-                            </div>
-                            <div class="leyenda-item">
-                                <span class="indicador seleccionado"></span>
-                                Seleccionado
-                            </div>
-                            <div class="leyenda-item">
-                                <span class="indicador ocupado"></span>
-                                Ocupado
-                            </div>
-                        </div>
-                    </div>
+<!-- Resumen de Reserva -->
+<div class="resumen-reserva-profesional">
+    <div class="resumen-header">
+        <h4><i class="fas fa-receipt"></i> Resumen de Reserva</h4>
+        <div class="resumen-estado" id="resumenEstado">
+            <i class="fas fa-info-circle"></i>
+            Completa los pasos para ver el resumen
+        </div>
+    </div>
+    <div class="resumen-detalles" id="resumenDetalles">
+        <!-- Detalles de la reserva -->
+    </div>
+</div>
 
-                    <!-- Resumen de Reserva -->
-                    <div class="resumen-reserva-profesional">
-                        <div class="resumen-header">
-                            <h4><i class="fas fa-receipt"></i> Resumen de Reserva</h4>
-                            <div class="resumen-estado" id="resumenEstado">
-                                <i class="fas fa-info-circle"></i>
-                                Completa los pasos para ver el resumen
-                            </div>
-                        </div>
-                        <div class="resumen-detalles" id="resumenDetalles">
-                            <!-- Detalles de la reserva -->
-                        </div>
-                    </div>
-
-                    <!-- Formulario de Reserva -->
-                    <div class="formulario-reserva-profesional" id="formularioReserva">
-                        <!-- Formulario dinámico -->
-                    </div>
-                </div>
+<!-- Formulario de Reserva -->
+<div class="formulario-reserva-profesional" id="formularioReserva">
+    <!-- Formulario dinámico -->
+</div>
             </div>
         </div>
     </section>
