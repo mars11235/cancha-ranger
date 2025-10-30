@@ -298,7 +298,7 @@ class SistemaCanchaRanger {
             });
         });
 
-        // Calendario
+        // Calendario - CORREGIDO
         document.getElementById('prev-mes')?.addEventListener('click', () => {
             this.mesActual--;
             if (this.mesActual < 0) {
@@ -344,7 +344,7 @@ class SistemaCanchaRanger {
     inicializarComponentes() {
         this.generarHTMLCanchas();
         this.generarHTMLListaCanchas();
-        this.generarCalendario();
+        this.generarCalendario(); // CORREGIDO - Ahora se llama correctamente
         this.actualizarHorarios();
         this.actualizarEstadoTiempoReal();
         this.mostrarResumenReserva();
@@ -589,7 +589,7 @@ class SistemaCanchaRanger {
         this.mostrarResumenReserva();
     }
 
-    // ===== SISTEMA DE CALENDARIO Y HORARIOS =====
+    // ===== SISTEMA DE CALENDARIO Y HORARIOS - CORREGIDO =====
     generarCalendario() {
         const diasMes = document.getElementById('diasMes');
         const mesActual = document.getElementById('mes-actual');
@@ -601,12 +601,15 @@ class SistemaCanchaRanger {
 
         // Obtener primer día del mes y último día
         const primerDia = new Date(this.añoActual, this.mesActual, 1).getDay();
+        // Ajustar para que la semana empiece en lunes (0 = lunes, 6 = domingo)
+        const primerDiaAjustado = primerDia === 0 ? 6 : primerDia - 1;
+        
         const ultimoDia = new Date(this.añoActual, this.mesActual + 1, 0).getDate();
 
         let html = '';
 
         // Días vacíos al inicio
-        for (let i = 0; i < primerDia; i++) {
+        for (let i = 0; i < primerDiaAjustado; i++) {
             html += '<div class="dia-calendario vacio"></div>';
         }
 
@@ -620,9 +623,13 @@ class SistemaCanchaRanger {
             const tieneReservas = this.state.reservas.some(r => r.fecha === fechaCompleta);
             
             let claseExtra = '';
-            if (esPasado) claseExtra = 'pasado';
-            else if (estaSeleccionado) claseExtra = 'seleccionado';
-            else if (tieneReservas) claseExtra = 'con-reservas';
+            if (esPasado) {
+                claseExtra = 'pasado';
+            } else if (estaSeleccionado) {
+                claseExtra = 'seleccionado';
+            } else if (tieneReservas) {
+                claseExtra = 'con-reservas';
+            }
 
             html += `
                 <div class="dia-calendario ${claseExtra}" 
@@ -657,25 +664,34 @@ class SistemaCanchaRanger {
                            hora < this.state.horaFinSeleccionada;
 
             let clase = 'hora-slot';
-            if (!disponible) clase += ' ocupado';
-            else if (estaSeleccionado || enRango) clase += ' seleccionado';
-            else clase += ' disponible';
+            if (!disponible) {
+                clase += ' ocupado';
+            } else if (estaSeleccionado || enRango) {
+                clase += ' seleccionado';
+            } else {
+                clase += ' disponible';
+            }
+
+            const onclick = disponible ? `sistema.seleccionarHora(${hora})` : '';
 
             html += `
-                <div class="${clase}" 
-                     onclick="${disponible ? `sistema.seleccionarHora(${hora})` : ''}">
+                <div class="${clase}" onclick="${onclick}">
                     ${hora}:00
                 </div>
             `;
         }
 
         horariosGrid.innerHTML = html;
+        this.actualizarInfoHoraSeleccion();
     }
 
     verificarDisponibilidadHora(fecha, hora) {
-        // Verificar si hay reservas que se superpongan
+        if (!this.state.canchaSeleccionada) return false;
+
+        // Verificar si hay reservas que se superpongan para esta cancha
         const reservasEnFecha = this.state.reservas.filter(r => 
             r.fecha === fecha && 
+            r.canchaId === this.state.canchaSeleccionada.id &&
             r.estado === 'confirmada'
         );
 
@@ -801,6 +817,11 @@ class SistemaCanchaRanger {
         document.querySelectorAll('.cancha-item-lista').forEach(item => {
             item.classList.remove('seleccionada');
         });
+        
+        // Resetear selección en calendario
+        document.querySelectorAll('.dia-calendario').forEach(dia => {
+            dia.classList.remove('seleccionado');
+        });
     }
 
     // ===== ESTADO EN TIEMPO REAL =====
@@ -910,13 +931,18 @@ class SistemaCanchaRanger {
 
     setLoading(loading) {
         this.state.isLoading = loading;
-        // Implementar lógica de loading si es necesario
+        // Puedes agregar aquí un spinner o indicador de carga si quieres
     }
 
     mostrarNotificacion(mensaje, tipo = 'info') {
-        // Implementación simple de notificación
-        console.log(`${tipo.toUpperCase()}: ${mensaje}`);
-        alert(mensaje); // Por ahora usamos alert, podrías implementar un sistema de notificaciones más elegante
+        // Por simplicidad usamos alert, pero podrías implementar un sistema de notificaciones más elegante
+        if (tipo === 'error') {
+            alert('❌ ' + mensaje);
+        } else if (tipo === 'success') {
+            alert('✅ ' + mensaje);
+        } else {
+            alert('ℹ️ ' + mensaje);
+        }
     }
 
     generarId() {
