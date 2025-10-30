@@ -169,23 +169,6 @@ Tu partido es en *${tipo}*
         await this.enviarMensajeDirecto(reserva.usuario.telefono, mensaje);
     }
 
-    // ===== MÉTODOS UTILITARIOS =====
-    formatearFechaLegible(fechaISO) {
-        const fecha = new Date(fechaISO);
-        return fecha.toLocaleDateString('es-ES', {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-        });
-    }
-
-    // ===== CONFIGURACIÓN EN TIEMPO REAL =====
-    toggleNotificaciones(activo) {
-        this.notificacionesActivas = activo;
-        console.log(`🔔 Notificaciones ${activo ? 'activadas' : 'desactivadas'}`);
-    }
-
     // ===== BOTÓN FLOTANTE WHATSAPP =====
     crearBotonFlotanteWhatsApp() {
         // Verificar si ya existe el botón
@@ -280,6 +263,23 @@ Tu partido es en *${tipo}*
         
         const mensajeCodificado = encodeURIComponent(mensaje);
         return `https://wa.me/${this.config.adminNumber}?text=${mensajeCodificado}`;
+    }
+
+    // ===== MÉTODOS UTILITARIOS =====
+    formatearFechaLegible(fechaISO) {
+        const fecha = new Date(fechaISO);
+        return fecha.toLocaleDateString('es-ES', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+    }
+
+    // ===== CONFIGURACIÓN EN TIEMPO REAL =====
+    toggleNotificaciones(activo) {
+        this.notificacionesActivas = activo;
+        console.log(`🔔 Notificaciones ${activo ? 'activadas' : 'desactivadas'}`);
     }
 
     // ===== INICIALIZACIÓN =====
