@@ -184,7 +184,7 @@ _Reserva confirmada automáticamente por el sistema_`;
         });
     }
 
-    // ===== FUNCIONES UTILITARIAS =====
+    // ===== FUNCIONES UTILITARIAS =
     formatearFechaLegible(fechaISO) {
         const fecha = new Date(fechaISO);
         return fecha.toLocaleDateString('es-ES', {
