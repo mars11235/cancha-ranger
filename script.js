@@ -22,7 +22,7 @@ class SistemaCanchaRanger {
                 nombre: "Cancha 1 Wally",
                 tipo: "Voleibol",
                 precio: this.config.precioWally,
-                imagen: "https://images.unsplash.com/photo-1540753003857-32e3d2f5b9e1?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+                imagen: "cancha1.jpg",
                 descripcion: "Cancha profesional de voleibol con medidas oficiales.",
                 caracteristicas: ["Iluminación profesional", "Piso de madera", "Red profesional"],
                 estado: "disponible",
@@ -33,7 +33,7 @@ class SistemaCanchaRanger {
                 nombre: "Cancha 2 Wally", 
                 tipo: "Voleibol",
                 precio: this.config.precioWally,
-                imagen: "https://images.unsplash.com/photo-1540753003857-32e3d2f5b9e1?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+                imagen: "cancha2.jpg",
                 descripcion: "Cancha de voleibol con iluminación profesional.",
                 caracteristicas: ["Iluminación LED", "Vestuarios cerca", "Marcación oficial"],
                 estado: "disponible",
@@ -44,7 +44,7 @@ class SistemaCanchaRanger {
                 nombre: "Cancha 3 Wally",
                 tipo: "Voleibol", 
                 precio: this.config.precioWally,
-                imagen: "https://images.unsplash.com/photo-1540753003857-32e3d2f5b9e1?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+                imagen: "cancha3.jpg",
                 descripcion: "Cancha competitiva de voleibol ideal para torneos y partidos.",
                 caracteristicas: ["Marcación oficial", "Red profesional", "Área de descanso"],
                 estado: "disponible",
@@ -55,7 +55,7 @@ class SistemaCanchaRanger {
                 nombre: "Cancha 4 Futsal",
                 tipo: "Futsal",
                 precio: this.config.precioFutsal,
-                imagen: "https://images.unsplash.com/photo-1540753003857-32e3d2f5b9e1?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+                imagen: "futsal.jpg",
                 descripcion: "Cancha sintetica de futsal ideal para torneos.",
                 caracteristicas: ["Piso sintético", "Arcos profesionales", "Iluminación LED"],
                 estado: "disponible", 
@@ -969,7 +969,7 @@ document.addEventListener('DOMContentLoaded', function() {
         window.whatsappService = new WhatsAppService();
         window.whatsappService.init();
     }
-});
+});                              
 
 // Funciones globales para onclick
 function mostrarDetallesCancha(canchaId) {
