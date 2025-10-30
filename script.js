@@ -896,24 +896,41 @@ verificarDisponibilidadFecha(fecha) {
         };
     }
 
-    procesarReserva(reserva) {
-        this.state.reservas.push(reserva);
-        this.guardarDatos('reservas', this.state.reservas);
-        
-        // Enviar notificaciones
-        if (window.emailService) {
-            const cancha = this.canchas.find(c => c.id === reserva.canchaId);
-            emailService.enviarConfirmacionUsuario(reserva, cancha);
-            emailService.enviarNotificacionAdmin(reserva, cancha);
-        }
-        
-        if (window.whatsappService) {
-            whatsappService.enviarNotificacionReserva(reserva);
-            whatsappService.enviarConfirmacionCliente(reserva);
-        }
-        
-        this.mostrarNotificacion(`¡Reserva confirmada! Código: ${reserva.codigoReserva}`, 'success');
+    // En el método procesarReserva, agrega:
+procesarReserva(reserva) {
+    this.state.reservas.push(reserva);
+    this.guardarDatos('reservas', this.state.reservas);
+    
+    // ===== NOTIFICACIONES INSTANTÁNEAS =====
+    
+    // 1. WhatsApp al administrador (INSTANTÁNEO)
+    if (window.whatsappService) {
+        whatsappService.enviarNotificacionInstantanea(reserva);
+        whatsappService.enviarAlertaUrgente(reserva);
+        whatsappService.programarRecordatorios(reserva);
     }
+    
+    // 2. WhatsApp al cliente
+    if (window.whatsappService) {
+        setTimeout(() => {
+            whatsappService.enviarConfirmacionCliente(reserva);
+        }, 2000); // Pequeño delay para que no se solapen
+    }
+    
+    // 3. Telegram (opcional)
+    if (window.telegramService) {
+        telegramService.enviarNotificacionTelegram(reserva);
+    }
+    
+    // 4. Email (si está configurado)
+    if (window.emailService) {
+        const cancha = this.canchas.find(c => c.id === reserva.canchaId);
+        emailService.enviarConfirmacionUsuario(reserva, cancha);
+        emailService.enviarNotificacionAdmin(reserva, cancha);
+    }
+    
+    this.mostrarNotificacion(`¡Reserva confirmada! Código: ${reserva.codigoReserva}`, 'success');
+}
 
     mostrarConfirmacionReserva(reserva) {
         const cancha = this.canchas.find(c => c.id === reserva.canchaId);
