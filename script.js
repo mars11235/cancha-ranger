@@ -478,7 +478,7 @@ class SistemaCanchaRanger {
     }
 
   avanzarPasoSimple(paso) {
-    console.log(`🔄 Avanzando al paso ${paso}`, this.reservaActual);
+    console.log(`🔄 Avanzando al paso ${paso}`);
     
     // Validación para paso 2
     if (paso === 2) {
@@ -488,35 +488,28 @@ class SistemaCanchaRanger {
         }
     }
     
-    // Validación para paso 3 - SOLO verificar horarios, NO datos del cliente
+    // Validación para paso 3
     if (paso === 3) {
         if (this.reservaActual.horarios.length === 0) {
             this.mostrarNotificacion('❌ Selecciona al menos un horario', 'error');
             return;
         }
-        // NO validamos datos del cliente aquí, solo en la confirmación final
     }
 
-    // Ocultar todos los pasos
-    document.querySelectorAll('.reserva-paso-simple').forEach(pasoElement => {
-        pasoElement.classList.remove('active');
+    // Ocultar todos los pasos y mostrar el actual
+    document.querySelectorAll('.reserva-paso-simple').forEach(p => {
+        p.classList.remove('active');
     });
     
-    // Mostrar el paso actual
     const pasoActual = document.getElementById(`pasoSimple${paso}`);
     if (pasoActual) {
         pasoActual.classList.add('active');
         
-        // Ejecutar acciones específicas del paso
         if (paso === 2) {
             this.inicializarHorariosMultiples();
         } else if (paso === 3) {
             this.actualizarResumenFinal();
         }
-        
-        console.log(`✅ Paso ${paso} activado correctamente`);
-    } else {
-        console.error(`❌ No se encontró el paso ${paso}`);
     }
 }
 
