@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-    <title>Cancha Ranger - Sistema Profesional de Reservas</title>
+    <title>Cancha Ranger - Reserva Tu Cancha Fácil y Rápido</title>
+    <meta name="description" content="Reserva tu cancha de voleibol o futsal en 2 minutos. Sistema fácil, rápido y confirmación inmediata por WhatsApp.">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <!-- Header Profesional -->
+    <!-- Header Simplificado -->
     <header class="header-profesional">
         <nav class="nav-profesional">
             <div class="nav-container">
@@ -18,24 +19,19 @@
                     </div>
                     <div class="logo-text">
                         <h1>CANCHA RANGER</h1>
-                        <span>Sistema de Reservas Profesional</span>
+                        <span>Reserva Rápida • Confirmación Inmediata</span>
                     </div>
                 </div>
                 <ul class="nav-menu">
                     <li><a href="#inicio" class="nav-link active"><i class="fas fa-home"></i> INICIO</a></li>
-                    <li><a href="#informacion" class="nav-link"><i class="fas fa-info-circle"></i> INFORMACIÓN</a></li>
                     <li><a href="#canchas" class="nav-link"><i class="fas fa-map-marker-alt"></i> CANCHAS</a></li>
-                    <li><a href="#reservas" class="nav-link btn-reserva-nav"><i class="fas fa-calendar-plus"></i> RESERVAR</a></li>
-                    <li><a href="#areaUsuario" class="nav-link" id="linkAreaUsuario" style="display: none;"><i class="fas fa-user"></i> MI CUENTA</a></li>
+                    <li><a href="#reservas" class="nav-link btn-reserva-nav"><i class="fas fa-calendar-plus"></i> RESERVAR YA</a></li>
+                    <li><a href="#contacto" class="nav-link"><i class="fas fa-phone"></i> CONTACTO</a></li>
                 </ul>
                 <div class="nav-actions">
                     <button class="btn-login" id="btnLogin">
                         <i class="fas fa-user"></i>
                         <span id="loginText">Mi Cuenta</span>
-                    </button>
-                    <button class="btn-logout" id="btnLogout" style="display: none;">
-                        <i class="fas fa-sign-out-alt"></i>
-                        Cerrar Sesión
                     </button>
                 </div>
                 <div class="hamburger">
@@ -47,234 +43,95 @@
         </nav>
     </header>
 
-    <!-- Modal Login -->
-    <div id="loginModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3><i class="fas fa-sign-in-alt"></i> Iniciar Sesión</h3>
-                <span class="close">&times;</span>
-            </div>
-            <div class="modal-body">
-                <div class="login-form">
-                    <div class="form-group">
-                        <label for="loginEmail"><i class="fas fa-envelope"></i> Correo Electrónico</label>
-                        <input type="email" id="loginEmail" placeholder="tu@email.com">
-                    </div>
-                    <div class="form-group">
-                        <label for="loginPassword"><i class="fas fa-lock"></i> Contraseña</label>
-                        <input type="password" id="loginPassword" placeholder="••••••••">
-                    </div>
-                    <button class="btn btn-primary btn-block" id="btnIniciarSesion">
-                        <i class="fas fa-sign-in-alt"></i>
-                        Ingresar al Sistema
-                    </button>
-                    <div class="login-links">
-                        <a href="#" class="link" id="linkCrearCuenta">¿No tienes cuenta? Crear una nueva</a>
-                    </div>
-                </div>
-
-                <div class="register-form" style="display: none;">
-                    <div class="form-group">
-                        <label for="regNombre"><i class="fas fa-user"></i> Nombre Completo</label>
-                        <input type="text" id="regNombre" placeholder="Juan Pérez">
-                    </div>
-                    <div class="form-group">
-                        <label for="regEmail"><i class="fas fa-envelope"></i> Correo Electrónico</label>
-                        <input type="email" id="regEmail" placeholder="tu@email.com">
-                    </div>
-                    <div class="form-group">
-                        <label for="regPhone"><i class="fas fa-phone"></i> Teléfono</label>
-                        <input type="tel" id="regPhone" placeholder="73314651">
-                    </div>
-                    <div class="form-group">
-                        <label for="regPassword"><i class="fas fa-lock"></i> Contraseña</label>
-                        <input type="password" id="regPassword" placeholder="Mínimo 6 caracteres">
-                    </div>
-                    <button class="btn btn-primary btn-block" id="btnRegistrarUsuario">
-                        <i class="fas fa-user-plus"></i>
-                        Crear Cuenta
-                    </button>
-                    <div class="login-links">
-                        <a href="#" class="link" id="linkVolverLogin">← Volver al login</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Detalles Cancha -->
-    <div id="detallesModal" class="modal">
-        <div class="modal-content modal-detalles">
-            <div class="modal-header">
-                <h3><i class="fas fa-info-circle"></i> Detalles de la Cancha</h3>
-                <span class="close">&times;</span>
-            </div>
-            <div class="modal-body" id="detallesCanchaBody">
-                <!-- Contenido dinámico -->
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Confirmación Reserva -->
-    <div id="confirmacionModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3><i class="fas fa-check-circle"></i> ¡Reserva Confirmada!</h3>
-                <span class="close">&times;</span>
-            </div>
-            <div class="modal-body" id="confirmacionBody">
-                <!-- Contenido dinámico -->
-            </div>
-        </div>
-    </div>
-
-    <!-- Sección Hero Profesional -->
+    <!-- Sección Hero MEJORADA -->
     <section id="inicio" class="hero-profesional">
         <div class="hero-overlay"></div>
         <div class="container">
             <div class="hero-content">
                 <div class="hero-badge">
                     <i class="fas fa-bolt"></i>
-                    Sistema en Tiempo Real
+                    Reserva en 2 Minutos
                 </div>
                 <h1 class="hero-title">
-                    Reserva tu Cancha en 
-                    <span class="text-acento">Tiempo Real</span>
+                    Reserva tu Cancha 
+                    <span class="text-acento">Fácil y Rápido</span>
                 </h1>
                 <p class="hero-description">
-                    Sistema profesional de reservas con confirmación inmediata, 
-                    calendario interactivo y notificaciones automáticas. 
-                    Disfruta del deporte sin complicaciones.
+                    Elige tu cancha, selecciona fecha y horario, y recibe confirmación inmediata por WhatsApp. 
+                    <strong>Sin complicaciones, sin esperas.</strong>
                 </p>
-                <div class="hero-features">
-                    <div class="feature">
-                        <i class="fas fa-sync-alt"></i>
+                
+                <div class="hero-stats">
+                    <div class="stat">
+                        <span class="stat-number">4</span>
+                        <span class="stat-label">Canchas Disponibles</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">2</span>
+                        <span class="stat-label">Minutos</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">100%</span>
+                        <span class="stat-label">Confirmación</span>
+                    </div>
+                </div>
+
+                <div class="hero-actions">
+                    <a href="#reservas" class="btn btn-primary btn-large">
+                        <i class="fas fa-play-circle"></i>
+                        Comenzar Reserva
+                    </a>
+                    <a href="#canchas" class="btn btn-secondary btn-large">
+                        <i class="fas fa-eye"></i>
+                        Ver Canchas
+                    </a>
+                </div>
+
+                <div class="hero-guarantee">
+                    <div class="guarantee-item">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Confirmación Inmediata</span>
+                    </div>
+                    <div class="guarantee-item">
+                        <i class="fas fa-clock"></i>
                         <span>Disponibilidad en Tiempo Real</span>
                     </div>
-                    <div class="feature">
-                        <i class="fas fa-envelope"></i>
-                        <span>Confirmación por Email</span>
-                    </div>
-                    <div class="feature">
-                        <i class="fas fa-mobile-alt"></i>
-                        <span>Gestión desde tu Celular</span>
-                    </div>
-                </div>
-                <div class="hero-actions">
-                    <a href="#canchas" class="btn btn-primary btn-large">
-                        <i class="fas fa-search"></i>
-                        Ver Canchas Disponibles
-                    </a>
-                    <a href="#reservas" class="btn btn-secondary btn-large">
-                        <i class="fas fa-calendar-check"></i>
-                        Reservar Ahora
-                    </a>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Sección Información -->
-    <section id="informacion" class="info-profesional">
-        <div class="container">
-            <div class="section-header">
-                <h2 class="section-title">Información del Establecimiento</h2>
-                <p class="section-subtitle">Todo lo que necesitas saber para tu experiencia perfecta</p>
-            </div>
-            <div class="info-grid-profesional">
-                <div class="info-card-profesional">
-                    <div class="info-icon">
-                        <i class="fas fa-map-marked-alt"></i>
-                    </div>
-                    <h3>Ubicación Estratégica</h3>
-                    <p>Calle 9 de abril entre Ejercito y Murillo Dorado</p>
-                    <div class="info-meta">
-                        <i class="fas fa-car"></i>
-                        Amplio estacionamiento
-                    </div>
-                </div>
-
-                <div class="info-card-profesional">
-                    <div class="info-icon">
-                        <i class="fas fa-phone-volume"></i>
-                    </div>
-                    <h3>Soporte Inmediato</h3>
-                    <p><strong>73314651</strong><br><strong>73220922</strong></p>
-                    <div class="info-meta">
-                        <i class="fas fa-comment-dots"></i>
-                        WhatsApp disponible
-                    </div>
-                </div>
-
-                <div class="info-card-profesional">
-                    <div class="info-icon">
-                        <i class="fas fa-clock"></i>
-                    </div>
-                    <h3>Horario Extendido</h3>
-                    <p><strong>2:00 PM - 10:00 PM</strong><br>Martes a Domingo</p>
-                    <div class="info-meta">
-                        <i class="fas fa-calendar-check"></i>
-                        Reservas online 24/7
-                    </div>
-                </div>
-
-                <div class="info-card-profesional">
-                    <div class="info-icon">
-                        <i class="fas fa-user-tie"></i>
-                    </div>
-                    <h3>Atención Personalizada</h3>
-                    <p><strong>Lurdes Córdova</strong><br>Operadora Especializada</p>
-                    <div class="info-meta">
-                        <i class="fas fa-headset"></i>
-                        Soporte profesional
-                    </div>
-                </div>
-            </div>
-
-            <!-- Políticas de Cancelación -->
-            <div class="politicas-section">
-                <h3>📝 Políticas de Reserva</h3>
-                <div class="politicas-grid">
-                    <div class="politica-card">
-                        <i class="fas fa-edit"></i>
-                        <h4>Modificaciones</h4>
-                        <p>Puedes modificar tu reserva hasta 12 horas antes del horario programado</p>
-                    </div>
-                    <div class="politica-card">
-                        <i class="fas fa-times-circle"></i>
-                        <h4>Cancelaciones</h4>
-                        <p>Cancelación sin costo hasta 12 horas antes. Después de ese tiempo no hay reembolso</p>
-                    </div>
-                    <div class="politica-card">
-                        <i class="fas fa-envelope"></i>
-                        <h4>Confirmaciones</h4>
-                        <p>Recibirás email de confirmación inmediato con todos los detalles de tu reserva</p>
+                    <div class="guarantee-item">
+                        <i class="fab fa-whatsapp"></i>
+                        <span>Soporte por WhatsApp</span>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Sección Canchas -->
+    <!-- Sección Canchas MEJORADA -->
     <section id="canchas" class="canchas-profesional">
         <div class="container">
             <div class="section-header">
-                <h2 class="section-title">Nuestras Canchas Disponibles</h2>
-                <p class="section-subtitle">Selecciona la cancha perfecta para tu partido</p>
+                <h2 class="section-title">Elige Tu Cancha Ideal</h2>
+                <p class="section-subtitle">Todas nuestras canchas están en perfecto estado y listas para jugar</p>
+            </div>
+
+            <!-- Filtros Rápidos -->
+            <div class="filtros-rapidos">
+                <button class="filtro-btn active" data-tipo="todas">Todas las Canchas</button>
+                <button class="filtro-btn" data-tipo="voleibol">Voleibol</button>
+                <button class="filtro-btn" data-tipo="futsal">Futsal</button>
             </div>
 
             <div class="canchas-grid-profesional" id="canchasGrid">
-                <!-- Las canchas se cargan dinámicamente con JavaScript -->
+                <!-- Las canchas se cargan dinámicamente -->
             </div>
 
-            <!-- Estado en Tiempo Real -->
+            <!-- Estado en Tiempo Real MEJORADO -->
             <div class="estado-tiempo-real">
                 <div class="estado-header">
-                    <i class="fas fa-sync-alt"></i>
-                    <h3>Disponibilidad en Tiempo Real</h3>
+                    <i class="fas fa-sync-alt fa-spin"></i>
+                    <h3>Estado en Tiempo Real</h3>
                     <span class="estado-indicador" id="estadoIndicador">
                         <i class="fas fa-circle"></i>
-                        Actualizado ahora
+                        Actualizado al instante
                     </span>
                 </div>
                 <div class="estado-cancha" id="estadoCanchas">
@@ -284,170 +141,144 @@
         </div>
     </section>
 
-    <!-- Sección Sistema de Reservas MEJORADA -->
+    <!-- Sección Sistema de Reservas SUPER MEJORADA -->
     <section id="reservas" class="reservas-profesional">
         <div class="container">
-            <div class="reserva-container-profesional">
-                <!-- Panel Lateral -->
-                <div class="reserva-sidebar">
-                    <div class="sidebar-header">
-                        <h3><i class="fas fa-list-alt"></i> Proceso de Reserva</h3>
-                        <p>Sigue estos simples pasos para reservar tu cancha</p>
-                    </div>
+            <div class="reserva-header-simple">
+                <h2>Reserva en 3 Pasos Sencillos</h2>
+                <p>Sigue estos pasos y en 2 minutos tendrás tu cancha reservada</p>
+            </div>
 
-                    <div class="canchas-lista-profesional" id="canchasLista">
-                        <!-- Lista de canchas para selección -->
+            <div class="reserva-container-simple">
+                <!-- Paso 1: Selección Rápida -->
+                <div class="reserva-paso-simple active" id="pasoSimple1">
+                    <div class="paso-indicador">
+                        <span class="paso-numero">1</span>
+                        <span class="paso-texto">Elige Cancha y Fecha</span>
                     </div>
-
-                    <!-- Información de Reservas -->
-                    <div class="info-reserva-sidebar">
-                        <h4><i class="fas fa-info-circle"></i> Información Importante</h4>
-                        <ul>
-                            <li><i class="fas fa-clock"></i> <strong>Horario:</strong> 2:00 PM - 10:00 PM</li>
-                            <li><i class="fas fa-stopwatch"></i> <strong>Reserva mínima:</strong> 1 hora</li>
-                            <li><i class="fas fa-edit"></i> <strong>Modificaciones:</strong> Hasta 12h antes</li>
-                            <li><i class="fas fa-money-bill-wave"></i> <strong>Pago:</strong> Efectivo en cancha</li>
-                        </ul>
-                    </div>
-
-                    <!-- Historial Rápido -->
-                    <div class="historial-rapido" id="historialRapido" style="display: none;">
-                        <h4><i class="fas fa-history"></i> Tus Reservas Recientes</h4>
-                        <div class="historial-lista" id="historialLista">
-                            <!-- Historial del usuario -->
+                    
+                    <div class="seleccion-rapida">
+                        <div class="seleccion-grupo">
+                            <label><i class="fas fa-map-marker-alt"></i> ¿Qué cancha quieres?</label>
+                            <div class="canchas-rapidas" id="canchasRapidas">
+                                <!-- Canchas en botones rápidos -->
+                            </div>
                         </div>
+
+                        <div class="seleccion-grupo">
+                            <label><i class="fas fa-calendar"></i> ¿Cuándo quieres jugar?</label>
+                            <div class="fechas-rapidas-hoy">
+                                <button class="fecha-btn active" data-dias="0">
+                                    <span class="fecha-dia">Hoy</span>
+                                    <span class="fecha-fecha" id="fechaHoy"></span>
+                                </button>
+                                <button class="fecha-btn" data-dias="1">
+                                    <span class="fecha-dia">Mañana</span>
+                                    <span class="fecha-fecha" id="fechaManana"></span>
+                                </button>
+                                <button class="fecha-btn" data-dias="2">
+                                    <span class="fecha-dia" id="diaPasadoManana"></span>
+                                    <span class="fecha-fecha" id="fechaPasadoManana"></span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="seleccion-grupo">
+                            <label><i class="fas fa-clock"></i> ¿A qué hora?</label>
+                            <div class="horarios-rapidos" id="horariosRapidos">
+                                <!-- Horarios disponibles -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="resumen-rapido" id="resumenRapido">
+                        <div class="resumen-vacio">
+                            <i class="fas fa-info-circle"></i>
+                            Completa la información para ver el resumen
+                        </div>
+                    </div>
+
+                    <button class="btn btn-primary btn-siguiente-simple" onclick="avanzarPasoSimple(2)">
+                        Continuar con mis datos <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+
+                <!-- Paso 2: Datos del Cliente -->
+                <div class="reserva-paso-simple" id="pasoSimple2">
+                    <div class="paso-indicador">
+                        <span class="paso-numero">2</span>
+                        <span class="paso-texto">Tus datos</span>
+                    </div>
+
+                    <div class="datos-cliente-simple">
+                        <h3><i class="fas fa-user"></i> Completa tus datos</h3>
+                        <p>Necesitamos esta información para confirmar tu reserva</p>
+
+                        <div class="formulario-simple">
+                            <div class="input-grupo">
+                                <label for="nombreSimple"><i class="fas fa-user"></i> Nombre completo *</label>
+                                <input type="text" id="nombreSimple" placeholder="Ej: Juan Pérez" required>
+                            </div>
+
+                            <div class="input-grupo">
+                                <label for="telefonoSimple"><i class="fas fa-phone"></i> Teléfono WhatsApp *</label>
+                                <input type="tel" id="telefonoSimple" placeholder="Ej: 73314651" required>
+                            </div>
+
+                            <div class="input-grupo">
+                                <label for="emailSimple"><i class="fas fa-envelope"></i> Email (opcional)</label>
+                                <input type="email" id="emailSimple" placeholder="Ej: tu@email.com">
+                            </div>
+
+                            <div class="input-grupo">
+                                <label for="notasSimple"><i class="fas fa-sticky-note"></i> Notas adicionales (opcional)</label>
+                                <textarea id="notasSimple" placeholder="Ej: Vamos a ser 8 personas..." rows="2"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="acciones-simple">
+                        <button class="btn btn-secondary" onclick="retrocederPasoSimple(1)">
+                            <i class="fas fa-arrow-left"></i> Atrás
+                        </button>
+                        <button class="btn btn-primary" onclick="avanzarPasoSimple(3)">
+                            Ver resumen final <i class="fas fa-arrow-right"></i>
+                        </button>
                     </div>
                 </div>
 
-                <!-- Panel Principal MEJORADO -->
-                <div class="reserva-main">
-                    <!-- Indicador de Progreso -->
-                    <div class="reserva-progress">
-                        <div class="progress-step active" data-paso="1">
-                            <span>1</span>
-                            <small>Cancha</small>
-                        </div>
-                        <div class="progress-step" data-paso="2">
-                            <span>2</span>
-                            <small>Fecha</small>
-                        </div>
-                        <div class="progress-step" data-paso="3">
-                            <span>3</span>
-                            <small>Horario</small>
-                        </div>
-                        <div class="progress-step" data-paso="4">
-                            <span>4</span>
-                            <small>Confirmar</small>
-                        </div>
+                <!-- Paso 3: Confirmación Final -->
+                <div class="reserva-paso-simple" id="pasoSimple3">
+                    <div class="paso-indicador">
+                        <span class="paso-numero">3</span>
+                        <span class="paso-texto">Confirma tu reserva</span>
                     </div>
 
-                    <!-- Paso 1: Selección de Cancha -->
-                    <div class="reserva-paso active" id="paso1">
-                        <div class="paso-header">
-                            <h3><i class="fas fa-map-marker-alt"></i> Paso 1: Selecciona tu Cancha</h3>
-                            <p>Elige la cancha que mejor se adapte a tus necesidades</p>
-                        </div>
-                        
-                        <div class="canchas-seleccion" id="canchasSeleccion">
-                            <!-- Canchas se cargan dinámicamente -->
+                    <div class="confirmacion-final">
+                        <div class="confirmacion-header">
+                            <i class="fas fa-check-circle"></i>
+                            <h3>¡Todo listo para confirmar!</h3>
+                            <p>Revisa los detalles de tu reserva</p>
                         </div>
 
-                        <div class="acciones-paso">
-                            <button class="btn btn-primary btn-siguiente" onclick="avanzarPaso(2)">
-                                Siguiente Paso <i class="fas fa-arrow-right"></i>
-                            </button>
+                        <div class="resumen-final" id="resumenFinal">
+                            <!-- Resumen final de la reserva -->
                         </div>
-                    </div>
 
-                    <!-- Paso 2: Selección de Fecha -->
-                    <div class="reserva-paso" id="paso2">
-                        <div class="paso-header">
-                            <h3><i class="fas fa-calendar-alt"></i> Paso 2: Elige la Fecha</h3>
-                            <p>Selecciona el día para tu reserva</p>
-                        </div>
-                        
-                        <div class="selector-fecha-mejorado">
-                            <div class="fecha-actual">
-                                <h4 id="fechaSeleccionadaInfo">Selecciona una fecha</h4>
+                        <div class="confirmacion-acciones">
+                            <div class="confirmacion-info">
+                                <i class="fas fa-info-circle"></i>
+                                <span>Al confirmar, se abrirá WhatsApp para enviar los datos al administrador</span>
                             </div>
-                            <div class="calendario-dias" id="calendarioDias">
-                                <!-- Días se cargan dinámicamente -->
+                            
+                            <div class="botones-confirmacion">
+                                <button class="btn btn-secondary" onclick="retrocederPasoSimple(2)">
+                                    <i class="fas fa-edit"></i> Modificar
+                                </button>
+                                <button class="btn btn-success" onclick="confirmarReservaWhatsApp()">
+                                    <i class="fab fa-whatsapp"></i> Confirmar por WhatsApp
+                                </button>
                             </div>
-                        </div>
-
-                        <div class="acciones-paso">
-                            <button class="btn btn-secondary" onclick="retrocederPaso(1)">
-                                <i class="fas fa-arrow-left"></i> Paso Anterior
-                            </button>
-                            <button class="btn btn-primary btn-siguiente" onclick="avanzarPaso(3)">
-                                Siguiente Paso <i class="fas fa-arrow-right"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Paso 3: Selección de Horario -->
-                    <div class="reserva-paso" id="paso3">
-                        <div class="paso-header">
-                            <h3><i class="fas fa-clock"></i> Paso 3: Selecciona el Horario</h3>
-                            <p>Elige el horario que prefieras para tu partido</p>
-                        </div>
-                        
-                        <div class="horarios-mejorados" id="horariosMejorados">
-                            <!-- Horarios se cargan dinámicamente -->
-                        </div>
-
-                        <div class="info-horario-seleccionado" id="infoHorarioSeleccionado">
-                            <!-- Información del horario seleccionado -->
-                        </div>
-
-                        <div class="acciones-paso">
-                            <button class="btn btn-secondary" onclick="retrocederPaso(2)">
-                                <i class="fas fa-arrow-left"></i> Paso Anterior
-                            </button>
-                            <button class="btn btn-primary btn-siguiente" onclick="avanzarPaso(4)">
-                                Siguiente Paso <i class="fas fa-arrow-right"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Paso 4: Confirmación y Datos -->
-                    <div class="reserva-paso" id="paso4">
-                        <div class="paso-header">
-                            <h3><i class="fas fa-user-check"></i> Paso 4: Confirma tu Reserva</h3>
-                            <p>Revisa los detalles y completa tus datos</p>
-                        </div>
-                        
-                        <div class="resumen-reserva-mejorado" id="resumenReservaMejorado">
-                            <!-- Resumen de la reserva -->
-                        </div>
-
-                        <div class="formulario-datos-cliente" id="formularioDatosCliente">
-                            <h4><i class="fas fa-user"></i> Tus Datos</h4>
-                            <div class="grupo-formulario">
-                                <label for="clienteNombre"><i class="fas fa-user"></i> Nombre Completo *</label>
-                                <input type="text" id="clienteNombre" placeholder="Juan Pérez" required>
-                            </div>
-                            <div class="grupo-formulario">
-                                <label for="clienteEmail"><i class="fas fa-envelope"></i> Correo Electrónico *</label>
-                                <input type="email" id="clienteEmail" placeholder="tu@email.com" required>
-                            </div>
-                            <div class="grupo-formulario">
-                                <label for="clienteTelefono"><i class="fas fa-phone"></i> Teléfono *</label>
-                                <input type="tel" id="clienteTelefono" placeholder="73314651" required>
-                            </div>
-                            <div class="grupo-formulario">
-                                <label for="clienteNotas"><i class="fas fa-sticky-note"></i> Notas Adicionales (opcional)</label>
-                                <textarea id="clienteNotas" placeholder="Información adicional sobre tu reserva..." rows="3"></textarea>
-                            </div>
-                        </div>
-
-                        <div class="acciones-paso">
-                            <button class="btn btn-secondary" onclick="retrocederPaso(3)">
-                                <i class="fas fa-arrow-left"></i> Paso Anterior
-                            </button>
-                            <button class="btn btn-success btn-confirmar" onclick="confirmarReservaFinal()">
-                                <i class="fas fa-check"></i> Confirmar Reserva
-                            </button>
                         </div>
                     </div>
                 </div>
@@ -455,20 +286,87 @@
         </div>
     </section>
 
-    <!-- Sección Área de Usuario -->
-    <section id="areaUsuario" class="area-usuario-profesional" style="display: none;">
+    <!-- Sección Contacto MEJORADA -->
+    <section id="contacto" class="contacto-profesional">
         <div class="container">
             <div class="section-header">
-                <h2 class="section-title">Mi Área Personal</h2>
-                <p class="section-subtitle">Gestiona tus reservas y información personal</p>
+                <h2 class="section-title">¿Necesitas Ayuda?</h2>
+                <p class="section-subtitle">Estamos aquí para ayudarte con tu reserva</p>
             </div>
-            <div class="area-usuario-content" id="areaUsuarioContent">
-                <!-- Contenido dinámico del área de usuario -->
+
+            <div class="contacto-grid">
+                <div class="contacto-card">
+                    <div class="contacto-icon">
+                        <i class="fab fa-whatsapp"></i>
+                    </div>
+                    <h3>WhatsApp Directo</h3>
+                    <p>Resuelve tus dudas al instante</p>
+                    <a href="https://wa.me/59173314651" class="btn btn-success" target="_blank">
+                        <i class="fab fa-whatsapp"></i> Escribir por WhatsApp
+                    </a>
+                </div>
+
+                <div class="contacto-card">
+                    <div class="contacto-icon">
+                        <i class="fas fa-phone"></i>
+                    </div>
+                    <h3>Llamada Telefónica</h3>
+                    <p>Habla directamente con nosotros</p>
+                    <a href="tel:73314651" class="btn btn-primary">
+                        <i class="fas fa-phone"></i> Llamar ahora
+                    </a>
+                </div>
+
+                <div class="contacto-card">
+                    <div class="contacto-icon">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <h3>Visítanos</h3>
+                    <p>Calle 9 de abril entre Ejercito y Murillo Dorado</p>
+                    <button class="btn btn-secondary" onclick="abrirGoogleMaps()">
+                        <i class="fas fa-directions"></i> Cómo llegar
+                    </button>
+                </div>
+            </div>
+
+            <!-- Información Importante -->
+            <div class="info-importante">
+                <h4><i class="fas fa-info-circle"></i> Información importante</h4>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <i class="fas fa-clock"></i>
+                        <div>
+                            <strong>Horario de atención</strong>
+                            <p>2:00 PM - 10:00 PM (Martes a Domingo)</p>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-user-tie"></i>
+                        <div>
+                            <strong>Operadora</strong>
+                            <p>Lurdes Córdova</p>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-money-bill-wave"></i>
+                        <div>
+                            <strong>Forma de pago</strong>
+                            <p>Efectivo en la cancha</p>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-edit"></i>
+                        <div>
+                            <strong>Modificaciones</strong>
+                            <p>Hasta 12 horas antes sin costo</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
 
-    <!-- Footer -->
+    <!-- Footer MEJORADO -->
     <footer class="footer-profesional">
         <div class="container">
             <div class="footer-content">
@@ -479,33 +377,55 @@
                         </div>
                         <div class="logo-text">
                             <h3>CANCHA RANGER</h3>
-                            <span>Sistema de Reservas Profesional</span>
+                            <span>Reserva Fácil, Juega Tranquilo</span>
                         </div>
                     </div>
-                    <p>El mejor sistema de reservas de canchas deportivas en tiempo real. Fácil, rápido y confiable.</p>
+                    <p>El sistema más simple para reservar canchas deportivas. Rápido, confiable y 100% funcional.</p>
                 </div>
+                
                 <div class="footer-contact">
-                    <h4>Contacto</h4>
+                    <h4>Contacto Directo</h4>
                     <p><i class="fas fa-phone"></i> 73314651 - 68308965</p>
+                    <p><i class="fab fa-whatsapp"></i> WhatsApp: 73314651</p>
                     <p><i class="fas fa-map-marker-alt"></i> Calle 9 de abril entre Ejercito y Murillo Dorado</p>
-                    <p><i class="fas fa-user-tie"></i> Operadora: Lurdes Córdova</p>
+                </div>
+
+                <div class="footer-rapido">
+                    <h4>Accesos Rápidos</h4>
+                    <a href="#reservas">Reservar Cancha</a>
+                    <a href="#canchas">Ver Canchas</a>
+                    <a href="#contacto">Contacto</a>
                 </div>
             </div>
+            
             <div class="footer-bottom">
-                <p>&copy; 2025 Cancha Ranger. Todos los derechos reservados. | Sistema desarrollado con ❤️ para amantes del deporte</p>
+                <p>&copy; 2025 Cancha Ranger. Sistema diseñado para facilitar tu experiencia deportiva.</p>
             </div>
         </div>
     </footer>
 
-    <!-- Botón WhatsApp Flotante -->
+    <!-- Botón WhatsApp Flotante MEJORADO -->
     <div class="whatsapp-flotante">
-        <a href="https://wa.me/59173314651?text=¡Hola!%20Quiero%20hacer%20una%20reserva%20en%20Cancha%20Ranger" target="_blank" class="whatsapp-link">
+        <div class="whatsapp-tooltip">¿Necesitas ayuda? Escríbenos</div>
+        <a href="https://wa.me/59173314651?text=¡Hola!%20Necesito%20ayuda%20con%20una%20reserva%20en%20Cancha%20Ranger" 
+           target="_blank" class="whatsapp-link">
             <i class="fab fa-whatsapp"></i>
-            <span>Reservar por WhatsApp</span>
         </a>
     </div>
 
-    <script src="email-service.js"></script>
+    <!-- Modal de Confirmación MEJORADO -->
+    <div id="confirmacionModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-check-circle"></i> ¡Reserva Enviada!</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body" id="confirmacionBody">
+                <!-- Contenido dinámico -->
+            </div>
+        </div>
+    </div>
+
     <script src="whatsapp-service.js"></script>
     <script src="script.js"></script>
 </body>
