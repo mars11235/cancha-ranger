@@ -1,23 +1,67 @@
-
+// ===== SERVICIO WHATSAPP MEJORADO - 100% FUNCIONAL =====
 // ===== SERVICIO WHATSAPP MEJORADO - 100% FUNCIONAL =====
 class WhatsAppService {
     constructor() {
         this.config = {
-            adminNumber: '59173314651', // Número del dueño
+            adminNumber: '59173314651', // Número del dueño - FORMATO INTERNACIONAL
             businessNumber: '59173220922', // Número de la empresa
             defaultMessage: '¡Hola! Quiero hacer una reserva en Cancha Ranger'
         };
         this.notificacionesActivas = true;
     }
 
-    // ===== ENVÍO DE RESERVA AL DUEÑO =====
+    // ===== ENVÍO DE RESERVA AL DUEÑO - MÉTODO PRINCIPAL =====
     async enviarReservaPropietario(reserva) {
-        if (!this.notificacionesActivas) return;
-        
-        const mensaje = this.generarMensajePropietario(reserva);
-        return await this.enviarMensajeDirecto(this.config.adminNumber, mensaje);
+        try {
+            console.log('📱 Iniciando envío de reserva al propietario:', reserva);
+            
+            if (!this.validarReserva(reserva)) {
+                throw new Error('Datos de reserva inválidos');
+            }
+
+            const mensaje = this.generarMensajePropietario(reserva);
+            const resultado = await this.enviarMensajeDirecto(this.config.adminNumber, mensaje);
+            
+            if (resultado) {
+                console.log('✅ Reserva enviada exitosamente al propietario');
+                return true;
+            } else {
+                throw new Error('Error al abrir WhatsApp');
+            }
+            
+        } catch (error) {
+            console.error('❌ Error enviando reserva al propietario:', error);
+            return false;
+        }
     }
 
+    // ===== VALIDACIÓN COMPLETA DE RESERVA =====
+    validarReserva(reserva) {
+        const camposRequeridos = [
+            'canchaNombre', 'fecha', 'horarios', 'usuario', 'total', 'codigoReserva'
+        ];
+        
+        for (let campo of camposRequeridos) {
+            if (!reserva[campo]) {
+                console.error(`Campo requerido faltante: ${campo}`);
+                return false;
+            }
+        }
+
+        if (!reserva.usuario.nombre || !reserva.usuario.telefono) {
+            console.error('Datos de usuario incompletos');
+            return false;
+        }
+
+        if (reserva.horarios.length === 0) {
+            console.error('No hay horarios seleccionados');
+            return false;
+        }
+
+        return true;
+    }
+
+    // ===== GENERAR MENSAJE PARA EL DUEÑO =====
     generarMensajePropietario(reserva) {
         let horariosTexto = '';
         reserva.horarios.forEach((grupo, index) => {
@@ -25,7 +69,7 @@ class WhatsAppService {
             horariosTexto += `• ${grupo[0]}:00 - ${grupo[grupo.length - 1] + 1}:00 (${horas} hora${horas > 1 ? 's' : ''})\n`;
         });
 
-        return `🚨 *NUEVA SOLICITUD DE RESERVA* 🚨
+        return `🚨 *NUEVA SOLICITUD DE RESERVA - CANCHA RANGER* 🚨
 
 📋 *INFORMACIÓN DE LA RESERVA*
 🏟️ Cancha: ${reserva.canchaNombre}
@@ -56,129 +100,29 @@ ${new Date().toLocaleString('es-ES')}
 _Reserva solicitada a través del sistema web_`;
     }
 
-    // ===== CONFIRMACIÓN AL CLIENTE =====
-    async enviarConfirmacionCliente(reserva) {
-        const mensaje = this.generarMensajeConfirmacion(reserva);
-        return await this.enviarMensajeDirecto(reserva.usuario.telefono, mensaje);
-    }
-
-    generarMensajeConfirmacion(reserva) {
-        let horariosTexto = '';
-        reserva.horarios.forEach((grupo, index) => {
-            const horas = grupo.length;
-            horariosTexto += `• ${grupo[0]}:00 - ${grupo[grupo.length - 1] + 1}:00 (${horas} hora${horas > 1 ? 's' : ''})\n`;
-        });
-
-        return `✅ *RESERVA CONFIRMADA - CANCHA RANGER* ✅
-
-¡Hola ${reserva.usuario.nombre}! Tu reserva ha sido confirmada:
-
-🏟️ *Cancha:* ${reserva.canchaNombre}
-📅 *Fecha:* ${this.formatearFechaLegible(reserva.fecha)}
-⏰ *Horarios:*
-${horariosTexto}
-💰 *Total a pagar:* ${reserva.total} Bs
-
-🔢 *Código de Reserva:* ${reserva.codigoReserva}
-
-📍 *Ubicación:* Calle 9 de abril entre Ejercito y Murillo Dorado
-📞 *Contacto:* 73314651-68308965
-👤 *Operadora:* Lurdes Córdova
-
-💡 *Importante:*
-• Presenta este código al llegar
-• Pago en efectivo en la cancha
-• Llega 15 minutos antes
-• Modificaciones hasta 12h antes
-
-¡Te esperamos! 🎉`;
-    }
-
     // ===== MÉTODO PRINCIPAL PARA ENVIAR MENSAJES =====
     async enviarMensajeDirecto(numero, mensaje) {
-        try {
-            const mensajeCodificado = encodeURIComponent(mensaje);
-            const urlWhatsApp = `https://wa.me/${numero}?text=${mensajeCodificado}`;
-            
-            // Abrir en nueva pestaña
-            const ventana = window.open(urlWhatsApp, '_blank');
-            
-            console.log('📱 Mensaje WhatsApp preparado:', { numero, mensaje });
-            return true;
-            
-        } catch (error) {
-            console.error('Error enviando WhatsApp:', error);
-            return false;
-        }
-    }
-
-    // ===== GENERAR ENLACES WHATSAPP =====
-    generarEnlaceConsultaRapida(canchaId = null) {
-        let mensaje = this.config.defaultMessage;
-        
-        if (canchaId && window.sistema) {
-            const cancha = window.sistema.canchas.find(c => c.id === canchaId);
-            if (cancha) {
-                mensaje = `¡Hola! Estoy interesado en la *${cancha.nombre}*.\n\n• Precio: ${cancha.precio} Bs/hora\n• Tipo: ${cancha.tipo}\n• ${cancha.descripcion}\n\n¿Podrían darme más información?`;
-            }
-        }
-        
-        const mensajeCodificado = encodeURIComponent(mensaje);
-        return `https://wa.me/${this.config.businessNumber}?text=${mensajeCodificado}`;
-    }
-
-    generarEnlaceReservaDirecta(datosReserva) {
-        const { cancha, fecha, horarios, nombre, telefono } = datosReserva;
-        
-        let horariosTexto = '';
-        const horariosAgrupados = this.agruparHorariosConsecutivos(horarios);
-        const total = horariosAgrupados.reduce((sum, grupo) => {
-            return sum + (grupo.length * cancha.precio);
-        }, 0);
-
-        horariosAgrupados.forEach((grupo, index) => {
-            const horas = grupo.length;
-            horariosTexto += `• ${grupo[0]}:00 - ${grupo[grupo.length - 1] + 1}:00 (${horas} hora${horas > 1 ? 's' : ''})\n`;
-        });
-        
-        const mensaje = `📅 *SOLICITUD DE RESERVA - CANCHA RANGER* 📅
-
-🏟️ *Cancha de interés:* ${cancha.nombre}
-👤 *Nombre:* ${nombre}
-📞 *Teléfono:* ${telefono}
-
-📆 *Fecha preferida:* ${this.formatearFechaLegible(fecha)}
-⏰ *Horarios preferidos:*
-${horariosTexto}
-💰 *Total estimado:* ${total} Bs
-
-💬 *Mensaje:* Por favor confirmen disponibilidad y procedimiento de pago.`;
-
-        const mensajeCodificado = encodeURIComponent(mensaje);
-        return `https://wa.me/${this.config.adminNumber}?text=${mensajeCodificado}`;
-    }
-
-    agruparHorariosConsecutivos(horarios) {
-        const horariosOrdenados = [...horarios].sort((a, b) => a - b);
-        const grupos = [];
-        let grupoActual = [];
-        
-        horariosOrdenados.forEach((hora, index) => {
-            if (grupoActual.length === 0) {
-                grupoActual.push(hora);
-            } else if (hora === grupoActual[grupoActual.length - 1] + 1) {
-                grupoActual.push(hora);
-            } else {
-                grupos.push([...grupoActual]);
-                grupoActual = [hora];
+        return new Promise((resolve) => {
+            try {
+                const mensajeCodificado = encodeURIComponent(mensaje);
+                const urlWhatsApp = `https://wa.me/${numero}?text=${mensajeCodificado}`;
+                
+                // Abrir en nueva pestaña
+                const ventana = window.open(urlWhatsApp, '_blank');
+                
+                if (ventana) {
+                    console.log('📱 WhatsApp abierto exitosamente');
+                    resolve(true);
+                } else {
+                    console.error('❌ No se pudo abrir WhatsApp');
+                    resolve(false);
+                }
+                
+            } catch (error) {
+                console.error('❌ Error crítico al abrir WhatsApp:', error);
+                resolve(false);
             }
         });
-        
-        if (grupoActual.length > 0) {
-            grupos.push(grupoActual);
-        }
-        
-        return grupos;
     }
 
     // ===== MÉTODOS UTILITARIOS =====
@@ -194,25 +138,7 @@ ${horariosTexto}
 
     // ===== INICIALIZACIÓN =====
     init() {
-        console.log('📱 Servicio de WhatsApp inicializado');
-        
-        // Crear botón flotante si no existe
-        if (!document.querySelector('.whatsapp-flotante')) {
-            this.crearBotonFlotanteWhatsApp();
-        }
+        console.log('✅ Servicio de WhatsApp inicializado correctamente');
+        return true;
     }
-
-    crearBotonFlotanteWhatsApp() {
-        const botonWhatsApp = document.createElement('div');
-        botonWhatsApp.className = 'whatsapp-flotante';
-        botonWhatsApp.innerHTML = `
-            <div class="whatsapp-tooltip">¿Necesitas ayuda? Escríbenos</div>
-            <a href="${this.generarEnlaceConsultaRapida()}" target="_blank" class="whatsapp-link">
-                <i class="fab fa-whatsapp"></i>
-            </a>
-        `;
-        
-        document.body.appendChild(botonWhatsApp);
-    }
-
-     }
+}

@@ -510,21 +510,43 @@ class SistemaCanchaRanger {
         return this.reservaActual.cancha && this.reservaActual.fecha;
     }
 
-    validarPaso2() {
-        const nombre = document.getElementById('nombreSimple').value;
-        const telefono = document.getElementById('telefonoSimple').value;
-        
-        if (!nombre || !telefono) {
-            return false;
-        }
+    validarDatosCliente() {
+    // Buscar inputs en el DOM
+    const nombreInput = document.getElementById('nombreSimple');
+    const telefonoInput = document.getElementById('telefonoSimple');
+    const emailInput = document.getElementById('emailSimple');
+    const notasInput = document.getElementById('notasSimple');
 
-        if (telefono.length < 8) {
-            this.mostrarNotificacion('❌ El teléfono debe tener al menos 8 dígitos', 'error');
-            return false;
-        }
-
-        return true;
+    if (!nombreInput || !telefonoInput) {
+        console.error('❌ No se encontraron los campos del formulario');
+        return false;
     }
+
+    const nombre = nombreInput.value.trim();
+    const telefono = telefonoInput.value.trim();
+    const email = emailInput ? emailInput.value.trim() : '';
+    const notas = notasInput ? notasInput.value.trim() : '';
+
+    if (!nombre || !telefono) {
+        this.mostrarNotificacion('❌ Nombre y teléfono son obligatorios', 'error');
+        return false;
+    }
+
+    if (telefono.length < 8) {
+        this.mostrarNotificacion('❌ El teléfono debe tener al menos 8 dígitos', 'error');
+        return false;
+    }
+
+    // Guardar datos en reserva actual
+    this.reservaActual.datosCliente = {
+        nombre,
+        telefono,
+        email,
+        notas
+    };
+
+    return true;
+}
 
     actualizarResumenFinal() {
         const contenedor = document.getElementById('resumenFinal');
@@ -591,8 +613,12 @@ class SistemaCanchaRanger {
         `;
     }
 
-    confirmarReservaWhatsApp() {
-        if (!this.validarPaso2()) {
+    async confirmarReservaWhatsApp() {
+    try {
+        console.log('🔄 Iniciando confirmación de reserva...');
+        
+        // Validar datos del cliente
+        if (!this.validarDatosCliente()) {
             this.mostrarNotificacion('❌ Completa correctamente tus datos', 'error');
             return;
         }
@@ -602,25 +628,20 @@ class SistemaCanchaRanger {
             return;
         }
 
-        const horariosAgrupados = this.agruparHorariosConsecutivos();
-        const total = horariosAgrupados.reduce((sum, grupo) => {
-            return sum + (grupo.length * this.reservaActual.cancha.precio);
-        }, 0);
-
-        const reserva = {
-            id: this.generarId(),
-            canchaId: this.reservaActual.cancha.id,
-            canchaNombre: this.reservaActual.cancha.nombre,
-            fecha: this.reservaActual.fecha,
-            horarios: horariosAgrupados,
-            usuario: this.reservaActual.datosCliente,
-            total: total,
-            codigoReserva: this.generarCodigoReserva(),
-            timestamp: new Date().toISOString()
-        };
-
-        this.enviarReservaWhatsApp(reserva);
+        // Generar reserva completa
+        const reserva = this.generarReservaCompleta();
+        
+        // Mostrar confirmación al usuario
+        this.mostrarConfirmacionReserva(reserva);
+        
+        // ENVIAR AL DUEÑO - PARTE CRÍTICA
+        await this.enviarReservaAlDueño(reserva);
+        
+    } catch (error) {
+        console.error('❌ Error en confirmación de reserva:', error);
+        this.mostrarNotificacion('❌ Error al procesar la reserva', 'error');
     }
+}
 
     enviarReservaWhatsApp(reserva) {
         const mensaje = this.generarMensajeWhatsApp(reserva);
@@ -633,6 +654,70 @@ class SistemaCanchaRanger {
             this.reiniciarSistemaReserva();
         }, 2000);
     }
+
+    // ===== GENERAR RESERVA COMPLETA =====
+generarReservaCompleta() {
+    const horariosAgrupados = this.agruparHorariosConsecutivos();
+    const total = horariosAgrupados.reduce((sum, grupo) => {
+        return sum + (grupo.length * this.reservaActual.cancha.precio);
+    }, 0);
+
+    return {
+        id: this.generarId(),
+        canchaId: this.reservaActual.cancha.id,
+        canchaNombre: this.reservaActual.cancha.nombre,
+        fecha: this.reservaActual.fecha,
+        horarios: horariosAgrupados,
+        usuario: this.reservaActual.datosCliente,
+        total: total,
+        codigoReserva: this.generarCodigoReserva(),
+        timestamp: new Date().toISOString()
+    };
+}
+
+// ===== ENVIAR RESERVA AL DUEÑO - MÉTODO PRINCIPAL =====
+async enviarReservaAlDueño(reserva) {
+    try {
+        console.log('📤 Enviando reserva al dueño...', reserva);
+        
+        // Verificar que el servicio WhatsApp esté disponible
+        if (!window.whatsappService) {
+            throw new Error('Servicio de WhatsApp no disponible');
+        }
+
+        // Enviar reserva al dueño/propietario
+        const resultado = await window.whatsappService.enviarReservaPropietario(reserva);
+        
+        if (resultado) {
+            console.log('✅ Reserva enviada exitosamente al dueño');
+            // Guardar en localStorage
+            this.guardarReservaEnHistorial(reserva);
+            
+            // Reiniciar sistema después de 3 segundos
+            setTimeout(() => {
+                this.reiniciarSistemaReserva();
+            }, 3000);
+        } else {
+            throw new Error('No se pudo enviar la reserva al dueño');
+        }
+        
+    } catch (error) {
+        console.error('❌ Error enviando reserva al dueño:', error);
+        throw error;
+    }
+}
+
+// ===== GUARDAR EN HISTORIAL =====
+guardarReservaEnHistorial(reserva) {
+    try {
+        const historial = JSON.parse(localStorage.getItem('canchaRanger_reservas') || '[]');
+        historial.push(reserva);
+        localStorage.setItem('canchaRanger_reservas', JSON.stringify(historial));
+        console.log('💾 Reserva guardada en historial');
+    } catch (error) {
+        console.error('Error guardando en historial:', error);
+    }
+}
 
     generarMensajeWhatsApp(reserva) {
         let horariosTexto = '';
