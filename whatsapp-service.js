@@ -18,13 +18,20 @@ class WhatsAppService {
     }
 
     generarMensajePropietario(reserva) {
+        let horariosTexto = '';
+        reserva.horarios.forEach((grupo, index) => {
+            const horas = grupo.length;
+            horariosTexto += `• ${grupo[0]}:00 - ${grupo[grupo.length - 1] + 1}:00 (${horas} hora${horas > 1 ? 's' : ''})\n`;
+        });
+
         return `🚨 *NUEVA SOLICITUD DE RESERVA* 🚨
 
 📋 *INFORMACIÓN DE LA RESERVA*
 🏟️ Cancha: ${reserva.canchaNombre}
 📅 Fecha: ${this.formatearFechaLegible(reserva.fecha)}
-⏰ Horario: ${reserva.horaInicio}:00 - ${reserva.horaFin}:00
-💰 Precio: ${reserva.total} Bs
+⏰ Horarios seleccionados:
+${horariosTexto}
+💰 Precio total: ${reserva.total} Bs
 🔢 Código: ${reserva.codigoReserva}
 🆔 ID: ${reserva.id}
 
@@ -55,14 +62,20 @@ _Reserva solicitada a través del sistema web_`;
     }
 
     generarMensajeConfirmacion(reserva) {
+        let horariosTexto = '';
+        reserva.horarios.forEach((grupo, index) => {
+            const horas = grupo.length;
+            horariosTexto += `• ${grupo[0]}:00 - ${grupo[grupo.length - 1] + 1}:00 (${horas} hora${horas > 1 ? 's' : ''})\n`;
+        });
+
         return `✅ *RESERVA CONFIRMADA - CANCHA RANGER* ✅
 
 ¡Hola ${reserva.usuario.nombre}! Tu reserva ha sido confirmada:
 
 🏟️ *Cancha:* ${reserva.canchaNombre}
 📅 *Fecha:* ${this.formatearFechaLegible(reserva.fecha)}
-⏰ *Horario:* ${reserva.horaInicio}:00 - ${reserva.horaFin}:00
-⏱️ *Duración:* 1 hora
+⏰ *Horarios:*
+${horariosTexto}
 💰 *Total a pagar:* ${reserva.total} Bs
 
 🔢 *Código de Reserva:* ${reserva.codigoReserva}
@@ -114,9 +127,18 @@ _Reserva solicitada a través del sistema web_`;
     }
 
     generarEnlaceReservaDirecta(datosReserva) {
-        const { cancha, fecha, horaInicio, horaFin, nombre, telefono } = datosReserva;
-        const horas = horaFin - horaInicio;
-        const total = horas * cancha.precio;
+        const { cancha, fecha, horarios, nombre, telefono } = datosReserva;
+        
+        let horariosTexto = '';
+        const horariosAgrupados = this.agruparHorariosConsecutivos(horarios);
+        const total = horariosAgrupados.reduce((sum, grupo) => {
+            return sum + (grupo.length * cancha.precio);
+        }, 0);
+
+        horariosAgrupados.forEach((grupo, index) => {
+            const horas = grupo.length;
+            horariosTexto += `• ${grupo[0]}:00 - ${grupo[grupo.length - 1] + 1}:00 (${horas} hora${horas > 1 ? 's' : ''})\n`;
+        });
         
         const mensaje = `📅 *SOLICITUD DE RESERVA - CANCHA RANGER* 📅
 
@@ -125,14 +147,37 @@ _Reserva solicitada a través del sistema web_`;
 📞 *Teléfono:* ${telefono}
 
 📆 *Fecha preferida:* ${this.formatearFechaLegible(fecha)}
-⏰ *Horario preferido:* ${horaInicio}:00 - ${horaFin}:00
-⏱️ *Duración:* ${horas} hora${horas > 1 ? 's' : ''}
+⏰ *Horarios preferidos:*
+${horariosTexto}
 💰 *Total estimado:* ${total} Bs
 
 💬 *Mensaje:* Por favor confirmen disponibilidad y procedimiento de pago.`;
 
         const mensajeCodificado = encodeURIComponent(mensaje);
         return `https://wa.me/${this.config.adminNumber}?text=${mensajeCodificado}`;
+    }
+
+    agruparHorariosConsecutivos(horarios) {
+        const horariosOrdenados = [...horarios].sort((a, b) => a - b);
+        const grupos = [];
+        let grupoActual = [];
+        
+        horariosOrdenados.forEach((hora, index) => {
+            if (grupoActual.length === 0) {
+                grupoActual.push(hora);
+            } else if (hora === grupoActual[grupoActual.length - 1] + 1) {
+                grupoActual.push(hora);
+            } else {
+                grupos.push([...grupoActual]);
+                grupoActual = [hora];
+            }
+        });
+        
+        if (grupoActual.length > 0) {
+            grupos.push(grupoActual);
+        }
+        
+        return grupos;
     }
 
     // ===== MÉTODOS UTILITARIOS =====

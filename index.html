@@ -141,16 +141,16 @@
         </div>
     </section>
 
-    <!-- Sección Sistema de Reservas SUPER MEJORADA -->
+    <!-- Sección Sistema de Reservas CON CALENDARIO Y HORARIOS MÚLTIPLES -->
     <section id="reservas" class="reservas-profesional">
         <div class="container">
             <div class="reserva-header-simple">
                 <h2>Reserva en 3 Pasos Sencillos</h2>
-                <p>Sigue estos pasos y en 2 minutos tendrás tu cancha reservada</p>
+                <p>Sistema mejorado: selecciona múltiples horas y confirma fácilmente</p>
             </div>
 
             <div class="reserva-container-simple">
-                <!-- Paso 1: Selección Rápida -->
+                <!-- Paso 1: Selección de Cancha y Fecha -->
                 <div class="reserva-paso-simple active" id="pasoSimple1">
                     <div class="paso-indicador">
                         <span class="paso-numero">1</span>
@@ -167,26 +167,24 @@
 
                         <div class="seleccion-grupo">
                             <label><i class="fas fa-calendar"></i> ¿Cuándo quieres jugar?</label>
-                            <div class="fechas-rapidas-hoy">
-                                <button class="fecha-btn active" data-dias="0">
-                                    <span class="fecha-dia">Hoy</span>
-                                    <span class="fecha-fecha" id="fechaHoy"></span>
-                                </button>
-                                <button class="fecha-btn" data-dias="1">
-                                    <span class="fecha-dia">Mañana</span>
-                                    <span class="fecha-fecha" id="fechaManana"></span>
-                                </button>
-                                <button class="fecha-btn" data-dias="2">
-                                    <span class="fecha-dia" id="diaPasadoManana"></span>
-                                    <span class="fecha-fecha" id="fechaPasadoManana"></span>
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="seleccion-grupo">
-                            <label><i class="fas fa-clock"></i> ¿A qué hora?</label>
-                            <div class="horarios-rapidos" id="horariosRapidos">
-                                <!-- Horarios disponibles -->
+                            
+                            <!-- Calendario Interactivo -->
+                            <div class="calendario-container">
+                                <div class="calendario-header">
+                                    <button class="btn-calendario-nav" id="btnMesAnterior">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </button>
+                                    <h4 id="mesActual"></h4>
+                                    <button class="btn-calendario-nav" id="btnMesSiguiente">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </button>
+                                </div>
+                                <div class="calendario-dias-semana">
+                                    <div>Dom</div><div>Lun</div><div>Mar</div><div>Mié</div><div>Jue</div><div>Vie</div><div>Sáb</div>
+                                </div>
+                                <div class="calendario-dias" id="calendarioDias">
+                                    <!-- Días generados dinámicamente -->
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -194,45 +192,39 @@
                     <div class="resumen-rapido" id="resumenRapido">
                         <div class="resumen-vacio">
                             <i class="fas fa-info-circle"></i>
-                            Completa la información para ver el resumen
+                            Selecciona cancha y fecha para continuar
                         </div>
                     </div>
 
                     <button class="btn btn-primary btn-siguiente-simple" onclick="avanzarPasoSimple(2)">
-                        Continuar con mis datos <i class="fas fa-arrow-right"></i>
+                        Continuar con horarios <i class="fas fa-arrow-right"></i>
                     </button>
                 </div>
 
-                <!-- Paso 2: Datos del Cliente -->
+                <!-- Paso 2: Selección de Horarios Múltiples -->
                 <div class="reserva-paso-simple" id="pasoSimple2">
                     <div class="paso-indicador">
                         <span class="paso-numero">2</span>
-                        <span class="paso-texto">Tus datos</span>
+                        <span class="paso-texto">Selecciona Horarios</span>
                     </div>
 
-                    <div class="datos-cliente-simple">
-                        <h3><i class="fas fa-user"></i> Completa tus datos</h3>
-                        <p>Necesitamos esta información para confirmar tu reserva</p>
+                    <div class="seleccion-horarios-multiples">
+                        <div class="info-horarios">
+                            <h3><i class="fas fa-clock"></i> Horarios Disponibles</h3>
+                            <p>Selecciona uno o más horarios consecutivos (mínimo 1 hora)</p>
+                            <div class="fecha-seleccionada" id="fechaSeleccionadaInfo"></div>
+                        </div>
 
-                        <div class="formulario-simple">
-                            <div class="input-grupo">
-                                <label for="nombreSimple"><i class="fas fa-user"></i> Nombre completo *</label>
-                                <input type="text" id="nombreSimple" placeholder="Ej: Juan Pérez" required>
+                        <div class="horarios-multiples-container">
+                            <div class="horarios-grid" id="horariosMultiples">
+                                <!-- Horarios generados dinámicamente -->
                             </div>
+                        </div>
 
-                            <div class="input-grupo">
-                                <label for="telefonoSimple"><i class="fas fa-phone"></i> Teléfono WhatsApp *</label>
-                                <input type="tel" id="telefonoSimple" placeholder="Ej: 73314651" required>
-                            </div>
-
-                            <div class="input-grupo">
-                                <label for="emailSimple"><i class="fas fa-envelope"></i> Email (opcional)</label>
-                                <input type="email" id="emailSimple" placeholder="Ej: tu@email.com">
-                            </div>
-
-                            <div class="input-grupo">
-                                <label for="notasSimple"><i class="fas fa-sticky-note"></i> Notas adicionales (opcional)</label>
-                                <textarea id="notasSimple" placeholder="Ej: Vamos a ser 8 personas..." rows="2"></textarea>
+                        <div class="resumen-horarios" id="resumenHorarios">
+                            <div class="resumen-vacio">
+                                <i class="fas fa-info-circle"></i>
+                                Selecciona al menos un horario
                             </div>
                         </div>
                     </div>
@@ -242,12 +234,12 @@
                             <i class="fas fa-arrow-left"></i> Atrás
                         </button>
                         <button class="btn btn-primary" onclick="avanzarPasoSimple(3)">
-                            Ver resumen final <i class="fas fa-arrow-right"></i>
+                            Continuar con datos <i class="fas fa-arrow-right"></i>
                         </button>
                     </div>
                 </div>
 
-                <!-- Paso 3: Confirmación Final -->
+                <!-- Paso 3: Datos del Cliente -->
                 <div class="reserva-paso-simple" id="pasoSimple3">
                     <div class="paso-indicador">
                         <span class="paso-numero">3</span>
@@ -421,6 +413,19 @@
                 <span class="close">&times;</span>
             </div>
             <div class="modal-body" id="confirmacionBody">
+                <!-- Contenido dinámico -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Detalles de Cancha -->
+    <div id="detallesModal" class="modal modal-detalles">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-info-circle"></i> Detalles de la Cancha</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body" id="detallesCanchaBody">
                 <!-- Contenido dinámico -->
             </div>
         </div>

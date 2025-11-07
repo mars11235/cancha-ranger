@@ -1,4 +1,4 @@
-// ===== SISTEMA CANCHA RANGER - VERSIÓN SUPER MEJORADA =====
+// ===== SISTEMA CANCHA RANGER - VERSIÓN CON CALENDARIO Y HORARIOS MÚLTIPLES =====
 
 class SistemaCanchaRanger {
     constructor() {
@@ -58,11 +58,16 @@ class SistemaCanchaRanger {
             }
         ];
 
-        // Estado de reserva actual
+        // Nuevas propiedades para calendario
+        this.fechaActual = new Date();
+        this.mesActual = this.fechaActual.getMonth();
+        this.anoActual = this.fechaActual.getFullYear();
+        
+        // Estado de reserva actual mejorado
         this.reservaActual = {
             cancha: null,
             fecha: null,
-            horario: null,
+            horarios: [], // Array para múltiples horarios
             datosCliente: null
         };
 
@@ -74,7 +79,7 @@ class SistemaCanchaRanger {
         this.inicializarEventListeners();
         this.inicializarComponentes();
         this.inicializarSistemaReservaSimple();
-        console.log('🚀 Sistema Cancha Ranger - Versión Mejorada Inicializada');
+        console.log('🚀 Sistema Cancha Ranger - Versión con Calendario y Horarios Múltiples Inicializada');
     }
 
     inicializarFechas() {
@@ -91,87 +96,236 @@ class SistemaCanchaRanger {
         
         // Nombre del día para pasado mañana
         const dias = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
-        document.getElementById('diaPasadoManana').textContent = dias[pasadoManana.getDay()];
+        document.getElementById('diaPasadoManana').textContent = dias[pasadoManana.getDay()].substring(0, 3);
     }
 
-    inicializarEventListeners() {
-        // Filtros de canchas
-        document.querySelectorAll('.filtro-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const tipo = e.target.dataset.tipo;
-                this.filtrarCanchas(tipo);
+    // ===== CALENDARIO INTERACTIVO =====
+    inicializarCalendario() {
+        this.actualizarCalendario();
+        
+        // Event listeners para navegación del calendario
+        document.getElementById('btnMesAnterior').addEventListener('click', () => {
+            this.mesActual--;
+            if (this.mesActual < 0) {
+                this.mesActual = 11;
+                this.anoActual--;
+            }
+            this.actualizarCalendario();
+        });
+
+        document.getElementById('btnMesSiguiente').addEventListener('click', () => {
+            this.mesActual++;
+            if (this.mesActual > 11) {
+                this.mesActual = 0;
+                this.anoActual++;
+            }
+            this.actualizarCalendario();
+        });
+    }
+
+    actualizarCalendario() {
+        const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
+                      'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+        
+        // Actualizar header
+        document.getElementById('mesActual').textContent = `${meses[this.mesActual]} ${this.anoActual}`;
+        
+        // Generar días del calendario
+        const primerDia = new Date(this.anoActual, this.mesActual, 1);
+        const ultimoDia = new Date(this.anoActual, this.mesActual + 1, 0);
+        const diasEnMes = ultimoDia.getDate();
+        const primerDiaSemana = primerDia.getDay();
+        
+        const calendarioDias = document.getElementById('calendarioDias');
+        let html = '';
+        
+        // Días vacíos al inicio
+        for (let i = 0; i < primerDiaSemana; i++) {
+            html += '<div class="dia-calendario inactivo"></div>';
+        }
+        
+        // Días del mes
+        const hoy = new Date();
+        hoy.setHours(0, 0, 0, 0);
+        
+        for (let dia = 1; dia <= diasEnMes; dia++) {
+            const fechaDia = new Date(this.anoActual, this.mesActual, dia);
+            const esHoy = fechaDia.getTime() === hoy.getTime();
+            const esPasado = fechaDia < hoy;
+            const fechaStr = fechaDia.toISOString().split('T')[0];
+            const seleccionado = this.reservaActual.fecha === fechaStr;
+            
+            let clase = 'dia-calendario';
+            if (esHoy) clase += ' hoy';
+            if (esPasado) clase += ' inactivo';
+            if (seleccionado) clase += ' seleccionado';
+            
+            const onclick = !esPasado ? `sistema.seleccionarFechaCalendario('${fechaStr}')` : '';
+            
+            html += `<div class="${clase}" onclick="${onclick}">${dia}</div>`;
+        }
+        
+        calendarioDias.innerHTML = html;
+    }
+
+    seleccionarFechaCalendario(fechaStr) {
+        this.reservaActual.fecha = fechaStr;
+        this.reservaActual.horarios = []; // Reset horarios al cambiar fecha
+        this.actualizarCalendario();
+        this.actualizarResumenRapido();
+        this.mostrarNotificacion(`📅 Fecha seleccionada: ${this.formatearFechaLegible(fechaStr)}`, 'success');
+    }
+
+    // ===== HORARIOS MÚLTIPLES =====
+    inicializarHorariosMultiples() {
+        const contenedor = document.getElementById('horariosMultiples');
+        if (!contenedor || !this.reservaActual.fecha) return;
+
+        let html = '';
+        for (let hora = this.config.horarioApertura; hora < this.config.horarioCierre; hora++) {
+            const disponible = this.verificarDisponibilidadHora(this.reservaActual.fecha, hora);
+            const seleccionado = this.reservaActual.horarios.includes(hora);
+            const esConsecutivo = this.esHorarioConsecutivo(hora);
+            
+            let clase = 'horario-multiple';
+            if (!disponible) clase += ' no-disponible';
+            if (seleccionado) clase += ' seleccionado';
+            if (esConsecutivo) clase += ' consecutivo';
+            
+            const onclick = disponible ? `sistema.toggleHorario(${hora})` : '';
+            
+            html += `
+                <div class="${clase}" onclick="${onclick}">
+                    ${hora}:00 - ${hora + 1}:00
+                </div>
+            `;
+        }
+        
+        contenedor.innerHTML = html;
+        
+        // Actualizar información de fecha
+        const fechaInfo = document.getElementById('fechaSeleccionadaInfo');
+        if (fechaInfo) {
+            fechaInfo.textContent = this.formatearFechaLegible(this.reservaActual.fecha);
+        }
+        
+        this.actualizarResumenHorarios();
+    }
+
+    toggleHorario(hora) {
+        const index = this.reservaActual.horarios.indexOf(hora);
+        
+        if (index === -1) {
+            // Agregar horario
+            this.reservaActual.horarios.push(hora);
+            this.reservaActual.horarios.sort((a, b) => a - b);
+        } else {
+            // Remover horario
+            this.reservaActual.horarios.splice(index, 1);
+        }
+        
+        this.inicializarHorariosMultiples();
+        this.mostrarNotificacion(`⏰ ${hora}:00 ${index === -1 ? 'agregado' : 'removido'}`, 'success');
+    }
+
+    esHorarioConsecutivo(hora) {
+        if (!this.reservaActual.horarios.includes(hora)) return false;
+        
+        // Verificar si es parte de una secuencia consecutiva
+        const horarios = this.reservaActual.horarios;
+        const index = horarios.indexOf(hora);
+        
+        // Verificar si tiene vecinos consecutivos
+        const tieneAnterior = index > 0 && horarios[index - 1] === hora - 1;
+        const tieneSiguiente = index < horarios.length - 1 && horarios[index + 1] === hora + 1;
+        
+        return tieneAnterior || tieneSiguiente;
+    }
+
+    actualizarResumenHorarios() {
+        const contenedor = document.getElementById('resumenHorarios');
+        if (!contenedor) return;
+
+        if (this.reservaActual.horarios.length > 0) {
+            let total = 0;
+            const horariosAgrupados = this.agruparHorariosConsecutivos();
+            
+            let html = '<div class="resumen-horarios-contenido">';
+            
+            horariosAgrupados.forEach(grupo => {
+                const horas = grupo.length;
+                const precioGrupo = horas * (this.reservaActual.cancha?.precio || 0);
+                total += precioGrupo;
                 
-                // Actualizar estado de botones
-                document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('active'));
-                e.target.classList.add('active');
+                html += `
+                    <div class="horario-seleccionado-item">
+                        <div>
+                            <strong>${grupo[0]}:00 - ${grupo[grupo.length - 1] + 1}:00</strong>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary);">
+                                ${horas} hora${horas > 1 ? 's' : ''} • ${precioGrupo} Bs
+                            </div>
+                        </div>
+                        <button class="btn-eliminar-horario" onclick="sistema.eliminarGrupoHorarios([${grupo}])">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                `;
             });
-        });
+            
+            html += `
+                <div class="total-horarios">
+                    <span>Total:</span>
+                    <span>${total} Bs</span>
+                </div>
+            </div>`;
+            
+            contenedor.innerHTML = html;
+        } else {
+            contenedor.innerHTML = `
+                <div class="resumen-vacio">
+                    <i class="fas fa-info-circle"></i>
+                    Selecciona al menos un horario
+                </div>
+            `;
+        }
+    }
 
-        // Fechas rápidas
-        document.querySelectorAll('.fecha-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const dias = parseInt(e.target.closest('.fecha-btn').dataset.dias);
-                this.seleccionarFechaRapida(dias);
-                
-                // Actualizar estado de botones
-                document.querySelectorAll('.fecha-btn').forEach(b => b.classList.remove('active'));
-                e.target.closest('.fecha-btn').classList.add('active');
-            });
-        });
-
-        // Cerrar modales
-        document.querySelectorAll('.close').forEach(closeBtn => {
-            closeBtn.addEventListener('click', function() {
-                this.closest('.modal').style.display = 'none';
-            });
-        });
-
-        // Cerrar modal al hacer click fuera
-        window.addEventListener('click', (e) => {
-            if (e.target.classList.contains('modal')) {
-                e.target.style.display = 'none';
+    agruparHorariosConsecutivos() {
+        const horarios = [...this.reservaActual.horarios].sort((a, b) => a - b);
+        const grupos = [];
+        let grupoActual = [];
+        
+        horarios.forEach((hora, index) => {
+            if (grupoActual.length === 0) {
+                grupoActual.push(hora);
+            } else if (hora === grupoActual[grupoActual.length - 1] + 1) {
+                grupoActual.push(hora);
+            } else {
+                grupos.push([...grupoActual]);
+                grupoActual = [hora];
             }
         });
-
-        // Menú hamburguesa
-        const hamburger = document.querySelector('.hamburger');
-        const navMenu = document.querySelector('.nav-menu');
         
-        hamburger?.addEventListener('click', () => {
-            hamburger.classList.toggle('active');
-            navMenu.classList.toggle('active');
-        });
-
-        // Navegación suave
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                    
-                    // Cerrar menú móvil
-                    hamburger?.classList.remove('active');
-                    navMenu?.classList.remove('active');
-                }
-            });
-        });
+        if (grupoActual.length > 0) {
+            grupos.push(grupoActual);
+        }
+        
+        return grupos;
     }
 
-    inicializarComponentes() {
-        this.generarHTMLCanchas();
-        this.generarCanchasRapidas();
-        this.actualizarEstadoTiempoReal();
-        this.inicializarHorariosRapidos();
+    eliminarGrupoHorarios(horarios) {
+        this.reservaActual.horarios = this.reservaActual.horarios.filter(
+            h => !horarios.includes(h)
+        );
+        this.inicializarHorariosMultiples();
     }
 
     // ===== SISTEMA DE RESERVA SIMPLE =====
     inicializarSistemaReservaSimple() {
+        this.inicializarCalendario();
         // Establecer fecha por defecto (hoy)
-        this.seleccionarFechaRapida(0);
+        const hoyStr = new Date().toISOString().split('T')[0];
+        this.seleccionarFechaCalendario(hoyStr);
     }
 
     generarCanchasRapidas() {
@@ -206,66 +360,14 @@ class SistemaCanchaRanger {
         }
 
         this.mostrarNotificacion(`✅ ${cancha.nombre} seleccionada`, 'success');
-        this.actualizarHorariosRapidos();
         this.actualizarResumenRapido();
-    }
-
-    seleccionarFechaRapida(dias) {
-        const fecha = new Date();
-        fecha.setDate(fecha.getDate() + dias);
-        const fechaStr = fecha.toISOString().split('T')[0];
-        
-        this.reservaActual.fecha = fechaStr;
-        this.actualizarHorariosRapidos();
-        this.actualizarResumenRapido();
-        
-        this.mostrarNotificacion(`📅 Fecha seleccionada: ${this.formatearFechaLegible(fechaStr)}`, 'success');
-    }
-
-    inicializarHorariosRapidos() {
-        const contenedor = document.getElementById('horariosRapidos');
-        if (!contenedor) return;
-
-        if (!this.reservaActual.fecha) {
-            contenedor.innerHTML = '<div class="horario-btn no-disponible">Selecciona fecha</div>';
-            return;
-        }
-
-        let html = '';
-        for (let hora = this.config.horarioApertura; hora < this.config.horarioCierre; hora++) {
-            const disponible = this.verificarDisponibilidadHora(this.reservaActual.fecha, hora);
-            const seleccionado = this.reservaActual.horario === hora;
-            
-            let clase = 'horario-btn';
-            if (!disponible) clase += ' no-disponible';
-            if (seleccionado) clase += ' seleccionado';
-            
-            const onclick = disponible ? `sistema.seleccionarHorarioRapido(${hora})` : '';
-            
-            html += `
-                <div class="${clase}" onclick="${onclick}">
-                    ${hora}:00
-                </div>
-            `;
-        }
-        
-        contenedor.innerHTML = html;
-    }
-
-    seleccionarHorarioRapido(hora) {
-        this.reservaActual.horario = hora;
-        this.inicializarHorariosRapidos();
-        this.actualizarResumenRapido();
-        this.mostrarNotificacion(`⏰ Horario ${hora}:00 seleccionado`, 'success');
     }
 
     actualizarResumenRapido() {
         const contenedor = document.getElementById('resumenRapido');
         if (!contenedor) return;
 
-        if (this.reservaActual.cancha && this.reservaActual.fecha && this.reservaActual.horario) {
-            const total = this.reservaActual.cancha.precio;
-            
+        if (this.reservaActual.cancha && this.reservaActual.fecha) {
             contenedor.innerHTML = `
                 <div class="resumen-contenido">
                     <div class="resumen-item">
@@ -277,12 +379,8 @@ class SistemaCanchaRanger {
                         <span>${this.formatearFechaLegible(this.reservaActual.fecha)}</span>
                     </div>
                     <div class="resumen-item">
-                        <span>Horario:</span>
-                        <span>${this.reservaActual.horario}:00 - ${this.reservaActual.horario + 1}:00</span>
-                    </div>
-                    <div class="resumen-item resumen-total">
-                        <span>Total:</span>
-                        <span>${total} Bs</span>
+                        <span>Precio por hora:</span>
+                        <span>${this.reservaActual.cancha.precio} Bs</span>
                     </div>
                 </div>
             `;
@@ -290,22 +388,22 @@ class SistemaCanchaRanger {
             contenedor.innerHTML = `
                 <div class="resumen-vacio">
                     <i class="fas fa-info-circle"></i>
-                    Completa la información para ver el resumen
+                    Selecciona cancha y fecha para continuar
                 </div>
             `;
         }
     }
 
-    // ===== CONFIRMACIÓN FINAL =====
+    // ===== CONFIRMACIÓN MEJORADA =====
     avanzarPasoSimple(paso) {
         // Validaciones antes de avanzar
         if (paso === 2 && !this.validarPaso1()) {
-            this.mostrarNotificacion('❌ Completa la información de la reserva primero', 'error');
+            this.mostrarNotificacion('❌ Selecciona cancha y fecha primero', 'error');
             return;
         }
 
-        if (paso === 3 && !this.validarPaso2()) {
-            this.mostrarNotificacion('❌ Completa tus datos personales', 'error');
+        if (paso === 3 && (!this.validarPaso2() || this.reservaActual.horarios.length === 0)) {
+            this.mostrarNotificacion('❌ Completa tus datos y selecciona al menos un horario', 'error');
             return;
         }
 
@@ -317,8 +415,10 @@ class SistemaCanchaRanger {
         // Mostrar paso actual
         document.getElementById(`pasoSimple${paso}`).classList.add('active');
 
-        // Actualizar resumen final si es el paso 3
-        if (paso === 3) {
+        // Inicializar componentes específicos del paso
+        if (paso === 2) {
+            this.inicializarHorariosMultiples();
+        } else if (paso === 3) {
             this.actualizarResumenFinal();
         }
     }
@@ -328,9 +428,7 @@ class SistemaCanchaRanger {
     }
 
     validarPaso1() {
-        return this.reservaActual.cancha && 
-               this.reservaActual.fecha && 
-               this.reservaActual.horario;
+        return this.reservaActual.cancha && this.reservaActual.fecha;
     }
 
     validarPaso2() {
@@ -357,7 +455,11 @@ class SistemaCanchaRanger {
         const telefono = document.getElementById('telefonoSimple').value;
         const email = document.getElementById('emailSimple').value;
         const notas = document.getElementById('notasSimple').value;
-        const total = this.reservaActual.cancha.precio;
+        
+        const horariosAgrupados = this.agruparHorariosConsecutivos();
+        const total = horariosAgrupados.reduce((sum, grupo) => {
+            return sum + (grupo.length * this.reservaActual.cancha.precio);
+        }, 0);
 
         this.reservaActual.datosCliente = {
             nombre,
@@ -365,6 +467,17 @@ class SistemaCanchaRanger {
             email,
             notas
         };
+
+        let horariosHTML = '';
+        horariosAgrupados.forEach(grupo => {
+            const horas = grupo.length;
+            horariosHTML += `
+                <div class="resumen-item">
+                    <strong>Horario:</strong>
+                    <span>${grupo[0]}:00 - ${grupo[grupo.length - 1] + 1}:00 (${horas} hora${horas > 1 ? 's' : ''})</span>
+                </div>
+            `;
+        });
 
         contenedor.innerHTML = `
             <div class="resumen-item">
@@ -375,14 +488,7 @@ class SistemaCanchaRanger {
                 <strong>Fecha:</strong>
                 <span>${this.formatearFechaLegible(this.reservaActual.fecha)}</span>
             </div>
-            <div class="resumen-item">
-                <strong>Horario:</strong>
-                <span>${this.reservaActual.horario}:00 - ${this.reservaActual.horario + 1}:00</span>
-            </div>
-            <div class="resumen-item">
-                <strong>Duración:</strong>
-                <span>1 hora</span>
-            </div>
+            ${horariosHTML}
             <div class="resumen-item">
                 <strong>Cliente:</strong>
                 <span>${nombre}</span>
@@ -412,16 +518,25 @@ class SistemaCanchaRanger {
             return;
         }
 
-        // Crear objeto de reserva
+        if (this.reservaActual.horarios.length === 0) {
+            this.mostrarNotificacion('❌ Selecciona al menos un horario', 'error');
+            return;
+        }
+
+        // Crear objeto de reserva mejorado
+        const horariosAgrupados = this.agruparHorariosConsecutivos();
+        const total = horariosAgrupados.reduce((sum, grupo) => {
+            return sum + (grupo.length * this.reservaActual.cancha.precio);
+        }, 0);
+
         const reserva = {
             id: this.generarId(),
             canchaId: this.reservaActual.cancha.id,
             canchaNombre: this.reservaActual.cancha.nombre,
             fecha: this.reservaActual.fecha,
-            horaInicio: this.reservaActual.horario,
-            horaFin: this.reservaActual.horario + 1,
+            horarios: horariosAgrupados,
             usuario: this.reservaActual.datosCliente,
-            total: this.reservaActual.cancha.precio,
+            total: total,
             codigoReserva: this.generarCodigoReserva(),
             timestamp: new Date().toISOString()
         };
@@ -447,13 +562,20 @@ class SistemaCanchaRanger {
     }
 
     generarMensajeWhatsApp(reserva) {
+        let horariosTexto = '';
+        reserva.horarios.forEach((grupo, index) => {
+            const horas = grupo.length;
+            horariosTexto += `• ${grupo[0]}:00 - ${grupo[grupo.length - 1] + 1}:00 (${horas} hora${horas > 1 ? 's' : ''})\n`;
+        });
+
         return `🏐 *NUEVA RESERVA - CANCHA RANGER* 🏐
 
 📋 *INFORMACIÓN DE LA RESERVA*
 🏟️ Cancha: ${reserva.canchaNombre}
 📅 Fecha: ${this.formatearFechaLegible(reserva.fecha)}
-⏰ Horario: ${reserva.horaInicio}:00 - ${reserva.horaFin}:00
-💰 Precio: ${reserva.total} Bs
+⏰ Horarios seleccionados:
+${horariosTexto}
+💰 Precio total: ${reserva.total} Bs
 🔢 Código: ${reserva.codigoReserva}
 
 👤 *DATOS DEL CLIENTE*
@@ -494,10 +616,6 @@ _Reserva solicitada a través del sistema web_`;
                         <span>${this.formatearFechaLegible(reserva.fecha)}</span>
                     </div>
                     <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                        <strong>Horario:</strong>
-                        <span>${reserva.horaInicio}:00 - ${reserva.horaFin}:00</span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
                         <strong>Total:</strong>
                         <span style="color: var(--primary-color); font-weight: bold;">${reserva.total} Bs</span>
                     </div>
@@ -527,7 +645,7 @@ _Reserva solicitada a través del sistema web_`;
         this.reservaActual = {
             cancha: null,
             fecha: null,
-            horario: null,
+            horarios: [],
             datosCliente: null
         };
         
@@ -535,13 +653,6 @@ _Reserva solicitada a través del sistema web_`;
         document.querySelectorAll('.cancha-rapida-btn').forEach(btn => {
             btn.classList.remove('seleccionada');
         });
-        
-        document.querySelectorAll('.fecha-btn').forEach(btn => {
-            btn.classList.remove('active');
-        });
-        
-        // Activar fecha de hoy
-        document.querySelector('.fecha-btn[data-dias="0"]').classList.add('active');
         
         // Resetear formulario
         document.getElementById('nombreSimple').value = '';
@@ -551,7 +662,7 @@ _Reserva solicitada a través del sistema web_`;
         
         // Volver al paso 1
         this.avanzarPasoSimple(1);
-        this.inicializarHorariosRapidos();
+        this.actualizarCalendario();
         this.actualizarResumenRapido();
         
         this.mostrarNotificacion('✅ Sistema reiniciado. ¡Puedes hacer otra reserva!', 'success');
@@ -715,6 +826,67 @@ _Reserva solicitada a través del sistema web_`;
     }
 
     // ===== FUNCIONES UTILITARIAS =====
+    inicializarEventListeners() {
+        // Filtros de canchas
+        document.querySelectorAll('.filtro-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const tipo = e.target.dataset.tipo;
+                this.filtrarCanchas(tipo);
+                
+                // Actualizar estado de botones
+                document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active');
+            });
+        });
+
+        // Cerrar modales
+        document.querySelectorAll('.close').forEach(closeBtn => {
+            closeBtn.addEventListener('click', function() {
+                this.closest('.modal').style.display = 'none';
+            });
+        });
+
+        // Cerrar modal al hacer click fuera
+        window.addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal')) {
+                e.target.style.display = 'none';
+            }
+        });
+
+        // Menú hamburguesa
+        const hamburger = document.querySelector('.hamburger');
+        const navMenu = document.querySelector('.nav-menu');
+        
+        hamburger?.addEventListener('click', () => {
+            hamburger.classList.toggle('active');
+            navMenu.classList.toggle('active');
+        });
+
+        // Navegación suave
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                    
+                    // Cerrar menú móvil
+                    hamburger?.classList.remove('active');
+                    navMenu?.classList.remove('active');
+                }
+            });
+        });
+    }
+
+    inicializarComponentes() {
+        this.generarHTMLCanchas();
+        this.generarCanchasRapidas();
+        this.actualizarEstadoTiempoReal();
+    }
+
     verificarDisponibilidadHora(fecha, hora) {
         if (!this.reservaActual.cancha) return true;
 
