@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-    <title>Cancha Ranger - Sistema para reservar canchas</title>
+    <title>Cancha Ranger - Sistema Profesional de Reservas</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
 </head>
@@ -18,7 +18,7 @@
                     </div>
                     <div class="logo-text">
                         <h1>CANCHA RANGER</h1>
-                        <span>Sistema de Reservas de canchas</span>
+                        <span>Sistema de Reservas Profesional</span>
                     </div>
                 </div>
                 <ul class="nav-menu">
@@ -51,7 +51,7 @@
     <div id="loginModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Iniciar Sesión</h3>
+                <h3><i class="fas fa-sign-in-alt"></i> Iniciar Sesión</h3>
                 <span class="close">&times;</span>
             </div>
             <div class="modal-body">
@@ -66,10 +66,10 @@
                     </div>
                     <button class="btn btn-primary btn-block" id="btnIniciarSesion">
                         <i class="fas fa-sign-in-alt"></i>
-                        Ingresar
+                        Ingresar al Sistema
                     </button>
                     <div class="login-links">
-                        <a href="#" class="link" id="linkCrearCuenta">Crear cuenta nueva</a>
+                        <a href="#" class="link" id="linkCrearCuenta">¿No tienes cuenta? Crear una nueva</a>
                     </div>
                 </div>
 
@@ -88,14 +88,14 @@
                     </div>
                     <div class="form-group">
                         <label for="regPassword"><i class="fas fa-lock"></i> Contraseña</label>
-                        <input type="password" id="regPassword" placeholder="••••••••">
+                        <input type="password" id="regPassword" placeholder="Mínimo 6 caracteres">
                     </div>
                     <button class="btn btn-primary btn-block" id="btnRegistrarUsuario">
                         <i class="fas fa-user-plus"></i>
                         Crear Cuenta
                     </button>
                     <div class="login-links">
-                        <a href="#" class="link" id="linkVolverLogin">Volver al login</a>
+                        <a href="#" class="link" id="linkVolverLogin">← Volver al login</a>
                     </div>
                 </div>
             </div>
@@ -110,6 +110,19 @@
                 <span class="close">&times;</span>
             </div>
             <div class="modal-body" id="detallesCanchaBody">
+                <!-- Contenido dinámico -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Confirmación Reserva -->
+    <div id="confirmacionModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-check-circle"></i> ¡Reserva Confirmada!</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body" id="confirmacionBody">
                 <!-- Contenido dinámico -->
             </div>
         </div>
@@ -271,23 +284,15 @@
         </div>
     </section>
 
-    <!-- Sección Sistema de Reservas -->
+    <!-- Sección Sistema de Reservas MEJORADA -->
     <section id="reservas" class="reservas-profesional">
         <div class="container">
             <div class="reserva-container-profesional">
                 <!-- Panel Lateral -->
                 <div class="reserva-sidebar">
                     <div class="sidebar-header">
-                        <h3><i class="fas fa-list-alt"></i> Selecciona Cancha</h3>
-                        <div class="filtro-horario">
-                            <label>Mostrar horarios de:</label>
-                            <select id="filtroHorario">
-                                <option value="today">Hoy</option>
-                                <option value="tomorrow">Mañana</option>
-                                <option value="week">Esta semana</option>
-                                <option value="all">Todos</option>
-                            </select>
-                        </div>
+                        <h3><i class="fas fa-list-alt"></i> Proceso de Reserva</h3>
+                        <p>Sigue estos simples pasos para reservar tu cancha</p>
                     </div>
 
                     <div class="canchas-lista-profesional" id="canchasLista">
@@ -314,101 +319,138 @@
                     </div>
                 </div>
 
-               <!-- Selector de Fecha Moderno -->
-<div class="selector-fecha-moderno">
-    <div class="selector-header">
-        <h4><i class="fas fa-calendar-day"></i> Selecciona la Fecha</h4>
-        <div class="fecha-hoy" id="fechaHoy">
-            <i class="fas fa-bolt"></i> Hoy
-        </div>
-    </div>
-    
-    <div class="input-fecha-container">
-        <div class="form-group">
-            <label for="fechaReserva"><i class="fas fa-calendar-alt"></i> Fecha de Reserva</label>
-            <input type="date" id="fechaReserva" min="" class="input-fecha-moderno">
-        </div>
-    </div>
+                <!-- Panel Principal MEJORADO -->
+                <div class="reserva-main">
+                    <!-- Indicador de Progreso -->
+                    <div class="reserva-progress">
+                        <div class="progress-step active" data-paso="1">
+                            <span>1</span>
+                            <small>Cancha</small>
+                        </div>
+                        <div class="progress-step" data-paso="2">
+                            <span>2</span>
+                            <small>Fecha</small>
+                        </div>
+                        <div class="progress-step" data-paso="3">
+                            <span>3</span>
+                            <small>Horario</small>
+                        </div>
+                        <div class="progress-step" data-paso="4">
+                            <span>4</span>
+                            <small>Confirmar</small>
+                        </div>
+                    </div>
 
-    <!-- Selector Rápido de Fechas -->
-    <div class="fechas-rapidas">
-        <h5><i class="fas fa-rocket"></i> Fechas Rápidas</h5>
-        <div class="botones-fechas-rapidas">
-            <button class="btn-fecha-rapida" data-dias="0">
-                <i class="fas fa-sun"></i>
-                <span>Hoy</span>
-            </button>
-            <button class="btn-fecha-rapida" data-dias="1">
-                <i class="fas fa-forward"></i>
-                <span>Mañana</span>
-            </button>
-            <button class="btn-fecha-rapida" data-dias="3">
-                <i class="fas fa-calendar-plus"></i>
-                <span>En 3 días</span>
-            </button>
-            <button class="btn-fecha-rapida" data-dias="7">
-                <i class="fas fa-calendar-week"></i>
-                <span>En 1 semana</span>
-            </button>
-        </div>
-    </div>
+                    <!-- Paso 1: Selección de Cancha -->
+                    <div class="reserva-paso active" id="paso1">
+                        <div class="paso-header">
+                            <h3><i class="fas fa-map-marker-alt"></i> Paso 1: Selecciona tu Cancha</h3>
+                            <p>Elige la cancha que mejor se adapte a tus necesidades</p>
+                        </div>
+                        
+                        <div class="canchas-seleccion" id="canchasSeleccion">
+                            <!-- Canchas se cargan dinámicamente -->
+                        </div>
 
-    <!-- Próximos Días Disponibles -->
-    <div class="proximos-dias" id="proximosDias">
-        <h5><i class="fas fa-list"></i> Próximos Días Disponibles</h5>
-        <div class="lista-dias" id="listaDias">
-            <!-- Se llena dinámicamente -->
-        </div>
-    </div>
-</div>
+                        <div class="acciones-paso">
+                            <button class="btn btn-primary btn-siguiente" onclick="avanzarPaso(2)">
+                                Siguiente Paso <i class="fas fa-arrow-right"></i>
+                            </button>
+                        </div>
+                    </div>
 
-<!-- Selector de Horarios -->
-<div class="horarios-profesional">
-    <div class="horarios-header">
-        <h4><i class="fas fa-clock"></i> Horarios Disponibles (2:00 PM - 10:00 PM)</h4>
-        <div class="horario-info">
-            <span class="hora-seleccion-info" id="horaSeleccionInfo">
-                Selecciona rango de horas
-            </span>
-        </div>
-    </div>
-    <div class="horarios-grid-profesional" id="horariosGrid">
-        <!-- Horarios generados dinámicamente -->
-    </div>
-    <div class="horarios-leyenda">
-        <div class="leyenda-item">
-            <span class="indicador disponible"></span>
-            Disponible
-        </div>
-        <div class="leyenda-item">
-            <span class="indicador seleccionado"></span>
-            Seleccionado
-        </div>
-        <div class="leyenda-item">
-            <span class="indicador ocupado"></span>
-            Ocupado
-        </div>
-    </div>
-</div>
+                    <!-- Paso 2: Selección de Fecha -->
+                    <div class="reserva-paso" id="paso2">
+                        <div class="paso-header">
+                            <h3><i class="fas fa-calendar-alt"></i> Paso 2: Elige la Fecha</h3>
+                            <p>Selecciona el día para tu reserva</p>
+                        </div>
+                        
+                        <div class="selector-fecha-mejorado">
+                            <div class="fecha-actual">
+                                <h4 id="fechaSeleccionadaInfo">Selecciona una fecha</h4>
+                            </div>
+                            <div class="calendario-dias" id="calendarioDias">
+                                <!-- Días se cargan dinámicamente -->
+                            </div>
+                        </div>
 
-<!-- Resumen de Reserva -->
-<div class="resumen-reserva-profesional">
-    <div class="resumen-header">
-        <h4><i class="fas fa-receipt"></i> Resumen de Reserva</h4>
-        <div class="resumen-estado" id="resumenEstado">
-            <i class="fas fa-info-circle"></i>
-            Completa los pasos para ver el resumen
-        </div>
-    </div>
-    <div class="resumen-detalles" id="resumenDetalles">
-        <!-- Detalles de la reserva -->
-    </div>
-</div>
+                        <div class="acciones-paso">
+                            <button class="btn btn-secondary" onclick="retrocederPaso(1)">
+                                <i class="fas fa-arrow-left"></i> Paso Anterior
+                            </button>
+                            <button class="btn btn-primary btn-siguiente" onclick="avanzarPaso(3)">
+                                Siguiente Paso <i class="fas fa-arrow-right"></i>
+                            </button>
+                        </div>
+                    </div>
 
-<!-- Formulario de Reserva -->
-<div class="formulario-reserva-profesional" id="formularioReserva">
-    <!-- Formulario dinámico -->
-</div>
+                    <!-- Paso 3: Selección de Horario -->
+                    <div class="reserva-paso" id="paso3">
+                        <div class="paso-header">
+                            <h3><i class="fas fa-clock"></i> Paso 3: Selecciona el Horario</h3>
+                            <p>Elige el horario que prefieras para tu partido</p>
+                        </div>
+                        
+                        <div class="horarios-mejorados" id="horariosMejorados">
+                            <!-- Horarios se cargan dinámicamente -->
+                        </div>
+
+                        <div class="info-horario-seleccionado" id="infoHorarioSeleccionado">
+                            <!-- Información del horario seleccionado -->
+                        </div>
+
+                        <div class="acciones-paso">
+                            <button class="btn btn-secondary" onclick="retrocederPaso(2)">
+                                <i class="fas fa-arrow-left"></i> Paso Anterior
+                            </button>
+                            <button class="btn btn-primary btn-siguiente" onclick="avanzarPaso(4)">
+                                Siguiente Paso <i class="fas fa-arrow-right"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Paso 4: Confirmación y Datos -->
+                    <div class="reserva-paso" id="paso4">
+                        <div class="paso-header">
+                            <h3><i class="fas fa-user-check"></i> Paso 4: Confirma tu Reserva</h3>
+                            <p>Revisa los detalles y completa tus datos</p>
+                        </div>
+                        
+                        <div class="resumen-reserva-mejorado" id="resumenReservaMejorado">
+                            <!-- Resumen de la reserva -->
+                        </div>
+
+                        <div class="formulario-datos-cliente" id="formularioDatosCliente">
+                            <h4><i class="fas fa-user"></i> Tus Datos</h4>
+                            <div class="grupo-formulario">
+                                <label for="clienteNombre"><i class="fas fa-user"></i> Nombre Completo *</label>
+                                <input type="text" id="clienteNombre" placeholder="Juan Pérez" required>
+                            </div>
+                            <div class="grupo-formulario">
+                                <label for="clienteEmail"><i class="fas fa-envelope"></i> Correo Electrónico *</label>
+                                <input type="email" id="clienteEmail" placeholder="tu@email.com" required>
+                            </div>
+                            <div class="grupo-formulario">
+                                <label for="clienteTelefono"><i class="fas fa-phone"></i> Teléfono *</label>
+                                <input type="tel" id="clienteTelefono" placeholder="73314651" required>
+                            </div>
+                            <div class="grupo-formulario">
+                                <label for="clienteNotas"><i class="fas fa-sticky-note"></i> Notas Adicionales (opcional)</label>
+                                <textarea id="clienteNotas" placeholder="Información adicional sobre tu reserva..." rows="3"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="acciones-paso">
+                            <button class="btn btn-secondary" onclick="retrocederPaso(3)">
+                                <i class="fas fa-arrow-left"></i> Paso Anterior
+                            </button>
+                            <button class="btn btn-success btn-confirmar" onclick="confirmarReservaFinal()">
+                                <i class="fas fa-check"></i> Confirmar Reserva
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
@@ -440,22 +482,31 @@
                             <span>Sistema de Reservas Profesional</span>
                         </div>
                     </div>
-                    <p>El mejor sistema de reservas de canchas deportivas en tiempo real</p>
+                    <p>El mejor sistema de reservas de canchas deportivas en tiempo real. Fácil, rápido y confiable.</p>
                 </div>
                 <div class="footer-contact">
                     <h4>Contacto</h4>
-                    <p><i class="fas fa-phone"></i>73314651-68308965</p>
+                    <p><i class="fas fa-phone"></i> 73314651 - 68308965</p>
                     <p><i class="fas fa-map-marker-alt"></i> Calle 9 de abril entre Ejercito y Murillo Dorado</p>
+                    <p><i class="fas fa-user-tie"></i> Operadora: Lurdes Córdova</p>
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2025 Cancha Ranger. Todos los derechos reservados.</p>
+                <p>&copy; 2025 Cancha Ranger. Todos los derechos reservados. | Sistema desarrollado con ❤️ para amantes del deporte</p>
             </div>
         </div>
     </footer>
 
+    <!-- Botón WhatsApp Flotante -->
+    <div class="whatsapp-flotante">
+        <a href="https://wa.me/59173314651?text=¡Hola!%20Quiero%20hacer%20una%20reserva%20en%20Cancha%20Ranger" target="_blank" class="whatsapp-link">
+            <i class="fab fa-whatsapp"></i>
+            <span>Reservar por WhatsApp</span>
+        </a>
+    </div>
+
     <script src="email-service.js"></script>
-    <script src="script.js"></script>
     <script src="whatsapp-service.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>

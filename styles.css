@@ -585,7 +585,6 @@ section {
     margin-bottom: 4rem;
 }
 
-/* ===== ESTILOS PARA LAS CANCHAS - CORREGIDOS ===== */
 .cancha-card-profesional {
     background: var(--bg-card);
     border-radius: var(--border-radius);
@@ -911,7 +910,7 @@ section {
     font-weight: 600;
 }
 
-/* ===== SISTEMA DE RESERVAS PROFESIONAL ===== */
+/* ===== SISTEMA DE RESERVAS PROFESIONAL MEJORADO ===== */
 .reservas-profesional {
     background: var(--secondary-color);
 }
@@ -945,24 +944,8 @@ section {
     gap: 0.5rem;
 }
 
-.filtro-horario {
-    margin-top: 1rem;
-}
-
-.filtro-horario label {
-    display: block;
+.sidebar-header p {
     color: var(--text-secondary);
-    margin-bottom: 0.5rem;
-    font-size: 0.9rem;
-}
-
-.filtro-horario select {
-    width: 100%;
-    padding: 0.8rem;
-    border: 1px solid var(--border-color);
-    border-radius: var(--border-radius-sm);
-    background: var(--secondary-color);
-    color: var(--text-primary);
     font-size: 0.9rem;
 }
 
@@ -1048,33 +1031,17 @@ section {
     gap: 0.5rem;
 }
 
-/* Panel Principal */
+/* Panel Principal MEJORADO */
 .reserva-main {
     padding: 2rem;
 }
 
-.reserva-header {
-    margin-bottom: 2rem;
-}
-
-.reserva-header h3 {
-    color: var(--text-primary);
-    margin-bottom: 0.5rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.reserva-header p {
-    color: var(--text-secondary);
-    margin-bottom: 1.5rem;
-}
-
+/* Sistema de Pasos Mejorado */
 .reserva-progress {
     display: flex;
     justify-content: space-between;
     position: relative;
-    margin-bottom: 2rem;
+    margin-bottom: 3rem;
 }
 
 .reserva-progress::before {
@@ -1083,7 +1050,7 @@ section {
     top: 20px;
     left: 0;
     right: 0;
-    height: 2px;
+    height: 3px;
     background: var(--border-color);
     z-index: 1;
 }
@@ -1094,6 +1061,7 @@ section {
     align-items: center;
     position: relative;
     z-index: 2;
+    flex: 1;
 }
 
 .progress-step span {
@@ -1108,74 +1076,165 @@ section {
     font-weight: 600;
     margin-bottom: 0.5rem;
     transition: var(--transition);
+    border: 3px solid var(--bg-card);
 }
 
 .progress-step.active span {
     background: var(--primary-color);
     color: white;
+    transform: scale(1.1);
 }
 
-.progress-step.active {
+.progress-step small {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.progress-step.active small {
     color: var(--primary-color);
+    font-weight: 600;
 }
 
-/* Calendario */
-.calendario-profesional {
-    background: var(--secondary-color);
-    padding: 1.5rem;
-    border-radius: var(--border-radius);
+/* Pasos de Reserva */
+.reserva-paso {
+    display: none;
+    animation: fadeIn 0.5s ease-in;
+}
+
+.reserva-paso.active {
+    display: block;
+}
+
+.paso-header {
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.paso-header h3 {
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.paso-header p {
+    color: var(--text-secondary);
+}
+
+/* Selección de Canchas */
+.canchas-seleccion {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
     margin-bottom: 2rem;
 }
 
-.calendario-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
+.cancha-opcion {
+    background: var(--bg-card);
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    cursor: pointer;
+    transition: var(--transition);
+    text-align: center;
+    position: relative;
 }
 
-.btn-calendario {
-    background: transparent;
-    border: 1px solid var(--border-color);
-    color: var(--text-primary);
-    width: 40px;
-    height: 40px;
+.cancha-opcion:hover {
+    border-color: var(--primary-color);
+    transform: translateY(-5px);
+}
+
+.cancha-opcion.seleccionada {
+    border-color: var(--primary-color);
+    background: rgba(139, 0, 0, 0.1);
+}
+
+.cancha-opcion.seleccionada::after {
+    content: '✓';
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: var(--primary-color);
+    color: white;
+    width: 25px;
+    height: 25px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    cursor: pointer;
-    transition: var(--transition);
+    font-weight: bold;
 }
 
-.btn-calendario:hover {
-    background: var(--primary-color);
-    border-color: var(--primary-color);
-}
-
-.dias-semana-profesional {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 0.5rem;
+.cancha-opcion img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-radius: var(--border-radius-sm);
     margin-bottom: 1rem;
-    text-align: center;
-    font-weight: 600;
-    color: var(--text-secondary);
 }
 
-.dias-mes-profesional {
+.cancha-opcion h4 {
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.cancha-opcion p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+.cancha-precio {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+.cancha-tipo {
+    background: var(--primary-color);
+    color: white;
+    padding: 0.3rem 0.8rem;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    display: inline-block;
+}
+
+/* Selector de Fecha Mejorado */
+.selector-fecha-mejorado {
+    background: var(--secondary-color);
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    margin-bottom: 1rem;
+}
+
+.fecha-actual {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.fecha-actual h4 {
+    color: var(--text-primary);
+    font-size: 1.1rem;
+}
+
+.calendario-dias {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     gap: 0.5rem;
 }
 
 .dia-calendario {
-    padding: 1rem;
+    padding: 1rem 0.5rem;
     text-align: center;
     border-radius: var(--border-radius-sm);
     cursor: pointer;
     transition: var(--transition);
-    border: 1px solid transparent;
+    border: 2px solid transparent;
+    background: var(--bg-card);
 }
 
 .dia-calendario:hover {
@@ -1189,188 +1248,171 @@ section {
     border-color: var(--primary-light);
 }
 
-/* Horarios */
-.horarios-profesional {
-    background: var(--secondary-color);
-    padding: 1.5rem;
-    border-radius: var(--border-radius);
-    margin-bottom: 2rem;
+.dia-calendario.no-disponible {
+    opacity: 0.3;
+    cursor: not-allowed;
+    background: var(--error-color);
 }
 
-.horarios-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
+.dia-calendario .dia-nombre {
+    font-size: 0.8rem;
+    display: block;
 }
 
-.horarios-header h4 {
-    color: var(--text-primary);
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
+.dia-calendario .dia-numero {
+    font-size: 1.1rem;
+    font-weight: bold;
+    display: block;
 }
 
-.horario-info {
-    color: var(--text-secondary);
-}
-
-.horarios-grid-profesional {
+/* Horarios Mejorados */
+.horarios-mejorados {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-    gap: 0.5rem;
+    gap: 0.8rem;
     margin-bottom: 1rem;
 }
 
-.hora-slot {
-    padding: 1rem;
+.hora-opcion {
+    padding: 1rem 0.5rem;
     text-align: center;
     border-radius: var(--border-radius-sm);
     cursor: pointer;
     transition: var(--transition);
-    border: 1px solid var(--border-color);
+    border: 2px solid var(--border-color);
+    background: var(--bg-card);
 }
 
-.hora-slot.disponible {
-    background: var(--success-color);
-    color: white;
+.hora-opcion:hover {
+    border-color: var(--primary-color);
+    transform: scale(1.05);
 }
 
-.hora-slot.ocupado {
-    background: var(--error-color);
-    color: white;
-    cursor: not-allowed;
-}
-
-.hora-slot.seleccionado {
+.hora-opcion.seleccionada {
     background: var(--primary-color);
     color: white;
     border-color: var(--primary-light);
 }
 
-.horarios-leyenda {
-    display: flex;
-    gap: 1rem;
-    justify-content: center;
-}
-
-.leyenda-item {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.8rem;
-    color: var(--text-secondary);
-}
-
-.indicador {
-    width: 12px;
-    height: 12px;
-    border-radius: 2px;
-}
-
-.indicador.disponible {
-    background: var(--success-color);
-}
-
-.indicador.ocupado {
+.hora-opcion.no-disponible {
     background: var(--error-color);
+    color: white;
+    cursor: not-allowed;
+    opacity: 0.6;
 }
 
-.indicador.seleccionado {
-    background: var(--primary-color);
+.info-horario-seleccionado {
+    background: var(--secondary-color);
+    padding: 1rem;
+    border-radius: var(--border-radius-sm);
+    margin-top: 1rem;
+    text-align: center;
+    border-left: 4px solid var(--primary-color);
 }
 
-/* Resumen de Reserva */
-.resumen-reserva-profesional {
+/* Resumen de Reserva Mejorado */
+.resumen-reserva-mejorado {
     background: var(--secondary-color);
     padding: 1.5rem;
     border-radius: var(--border-radius);
     margin-bottom: 2rem;
-}
-
-.resumen-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
-}
-
-.resumen-header h4 {
-    color: var(--text-primary);
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.resumen-estado {
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.resumen-detalles {
-    color: var(--text-secondary);
+    border-left: 4px solid var(--primary-color);
 }
 
 .resumen-item {
-    padding: 0.5rem 0;
-    border-bottom: 1px solid var(--border-color);
     display: flex;
     justify-content: space-between;
+    padding: 0.8rem 0;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .resumen-item:last-child {
     border-bottom: none;
 }
 
-.resumen-vacio {
-    text-align: center;
-    color: var(--text-muted);
-    font-style: italic;
+.resumen-total {
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: var(--primary-color);
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 2px solid var(--border-color);
 }
 
-/* Formulario de Reserva */
-.formulario-reserva-profesional {
-    background: var(--secondary-color);
+/* Formulario de Datos del Cliente */
+.formulario-datos-cliente {
+    background: var(--bg-card);
     padding: 1.5rem;
     border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+    margin-bottom: 2rem;
 }
 
-.form-group {
+.formulario-datos-cliente h4 {
+    color: var(--text-primary);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.grupo-formulario {
     margin-bottom: 1.5rem;
 }
 
-.form-group label {
+.grupo-formulario label {
     display: block;
-    color: var(--text-primary);
     margin-bottom: 0.5rem;
+    color: var(--text-primary);
     font-weight: 500;
     display: flex;
     align-items: center;
     gap: 0.5rem;
 }
 
-.form-group input,
-.form-group select,
-.form-group textarea {
+.grupo-formulario input,
+.grupo-formulario textarea {
     width: 100%;
     padding: 0.8rem 1rem;
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius-sm);
-    background: var(--bg-card);
+    background: var(--secondary-color);
     color: var(--text-primary);
-    font-size: 0.9rem;
+    font-size: 1rem;
     transition: var(--transition);
+    font-family: inherit;
 }
 
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
+.grupo-formulario input:focus,
+.grupo-formulario textarea:focus {
     outline: none;
     border-color: var(--primary-color);
     box-shadow: 0 0 0 3px rgba(139, 0, 0, 0.1);
+}
+
+.grupo-formulario textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+/* Acciones de Paso */
+.acciones-paso {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 2rem;
+    gap: 1rem;
+}
+
+.btn-siguiente {
+    margin-left: auto;
+}
+
+.btn-confirmar {
+    background: linear-gradient(135deg, var(--success-color), #1e7e34);
+}
+
+.btn-confirmar:hover {
+    background: linear-gradient(135deg, #1e7e34, var(--success-color));
 }
 
 /* Área de Usuario */
@@ -1659,6 +1701,11 @@ section {
     100% { transform: rotate(360deg); }
 }
 
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
 /* ===== RESPONSIVE DESIGN ===== */
 @media (max-width: 768px) {
     .container {
@@ -1730,23 +1777,38 @@ section {
         margin: 10% auto;
     }
 
-    .dias-mes-profesional,
-    .dias-semana-profesional {
-        grid-template-columns: repeat(7, 1fr);
-        font-size: 0.8rem;
+    .reserva-progress {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .progress-step {
+        flex-direction: row;
+        gap: 1rem;
+    }
+    
+    .progress-step small {
+        margin-bottom: 0;
+    }
+    
+    .acciones-paso {
+        flex-direction: column;
+    }
+    
+    .btn-siguiente {
+        margin-left: 0;
     }
 
-    .dia-calendario {
-        padding: 0.5rem;
+    .canchas-seleccion {
+        grid-template-columns: 1fr;
     }
 
-    .horarios-grid-profesional {
+    .calendario-dias {
         grid-template-columns: repeat(4, 1fr);
     }
 
-    .footer-content {
-        grid-template-columns: 1fr;
-        text-align: center;
+    .horarios-mejorados {
+        grid-template-columns: repeat(3, 1fr);
     }
 }
 
@@ -1764,16 +1826,20 @@ section {
         font-size: 1rem;
     }
 
-    .horarios-grid-profesional {
-        grid-template-columns: repeat(3, 1fr);
-    }
-
     .modal-body {
         padding: 1.5rem;
     }
 
     .detalles-acciones {
         flex-direction: column;
+    }
+
+    .calendario-dias {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .horarios-mejorados {
+        grid-template-columns: repeat(2, 1fr);
     }
 }
 
@@ -1869,237 +1935,3 @@ section {
     gap: 10px;
     margin-top: 15px;
 }
-
-/* ===== SELECTOR DE FECHA MODERNO ===== */
-.selector-fecha-moderno {
-    background: var(--secondary-color);
-    padding: 1.5rem;
-    border-radius: var(--border-radius);
-    margin-bottom: 2rem;
-    border: 1px solid var(--border-color);
-}
-
-.selector-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.5rem;
-}
-
-.selector-header h4 {
-    color: var(--text-primary);
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin: 0;
-    font-size: 1.1rem;
-}
-
-.fecha-hoy {
-    background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
-    color: white;
-    padding: 0.5rem 1rem;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    cursor: pointer;
-    transition: var(--transition);
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-weight: 600;
-}
-
-.fecha-hoy:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-}
-
-.input-fecha-container {
-    margin-bottom: 1.5rem;
-    position: relative;
-}
-
-.input-fecha-container label {
-    display: block;
-    color: var(--text-primary);
-    margin-bottom: 0.5rem;
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.input-fecha-moderno {
-    width: 100%;
-    padding: 1rem;
-    border: 2px solid var(--border-color);
-    border-radius: var(--border-radius-sm);
-    background: var(--bg-card);
-    color: var(--text-primary);
-    font-size: 1rem;
-    font-family: inherit;
-    transition: var(--transition);
-}
-
-.input-fecha-moderno:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(139, 0, 0, 0.1);
-}
-
-/* Fechas Rápidas */
-.fechas-rapidas {
-    margin-bottom: 1.5rem;
-}
-
-.fechas-rapidas h5 {
-    color: var(--text-primary);
-    margin-bottom: 1rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 1rem;
-}
-
-.botones-fechas-rapidas {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 0.8rem;
-}
-
-.btn-fecha-rapida {
-    background: var(--bg-card);
-    border: 2px solid var(--border-color);
-    color: var(--text-secondary);
-    padding: 1rem 0.8rem;
-    border-radius: var(--border-radius-sm);
-    cursor: pointer;
-    transition: var(--transition);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.8rem;
-}
-
-.btn-fecha-rapida:hover {
-    border-color: var(--primary-color);
-    color: var(--text-primary);
-    transform: translateY(-2px);
-}
-
-.btn-fecha-rapida.active {
-    background: var(--primary-color);
-    border-color: var(--primary-color);
-    color: white;
-}
-
-/* Próximos Días */
-.proximos-dias h5 {
-    color: var(--text-primary);
-    margin-bottom: 1rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 1rem;
-}
-
-.lista-dias {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.dia-item {
-    background: var(--bg-card);
-    border: 2px solid var(--border-color);
-    padding: 1rem;
-    border-radius: var(--border-radius-sm);
-    cursor: pointer;
-    transition: var(--transition);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.dia-item:hover {
-    border-color: var(--primary-color);
-    transform: translateX(5px);
-}
-
-.dia-item.seleccionado {
-    background: var(--primary-color);
-    border-color: var(--primary-color);
-    color: white;
-}
-
-.dia-info {
-    display: flex;
-    flex-direction: column;
-}
-
-.dia-fecha {
-    font-weight: 600;
-    font-size: 0.9rem;
-}
-
-.dia-nombre {
-    font-size: 0.8rem;
-    color: inherit;
-    opacity: 0.8;
-}
-
-.dia-disponibilidad {
-    font-size: 0.7rem;
-    padding: 0.3rem 0.6rem;
-    border-radius: 12px;
-    background: var(--success-color);
-    color: white;
-    font-weight: 600;
-}
-
-.dia-disponibilidad.ocupado {
-    background: var(--error-color);
-}
-
-.dia-disponibilidad.limitado {
-    background: var(--warning-color);
-    color: black;
-}
-
-/* Estilos para el input date nativo */
-input[type="date"] {
-    position: relative;
-}
-
-input[type="date"]::-webkit-calendar-picker-indicator {
-    background: transparent;
-    bottom: 0;
-    color: transparent;
-    cursor: pointer;
-    height: auto;
-    left: 0;
-    position: absolute;
-    right: 0;
-    top: 0;
-    width: auto;
-}
-
-.input-fecha-container::after {
-    content: "📅";
-    position: absolute;
-    right: 15px;
-    top: 65%;
-    transform: translateY(-50%);
-    pointer-events: none;
-    font-size: 1.2rem;
-    background: var(--primary-color);
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-}
-
