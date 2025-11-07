@@ -72,16 +72,29 @@ class SistemaCanchaRanger {
         this.mesActual = this.fechaActual.getMonth();
         this.anoActual = this.fechaActual.getFullYear();
 
+         // SISTEMA ADMIN - AGREGAR ESTO
+    this.adminCredentials = {
+        usuario: 'admin',
+        password: 'CanchaRanger2025'
+    };
+    
+    this.estadosReserva = {
+        PENDIENTE: 'pendiente',
+        CONFIRMADA: 'confirmada', 
+        CANCELADA: 'cancelada'
+    };
+
         this.init();
     }
 
-    init() {
-        console.log('🚀 Sistema Cancha Ranger Inicializado');
-        this.inicializarFechas();
-        this.inicializarEventListeners();
-        this.inicializarComponentes();
-        this.inicializarSistemaReservaSimple();
-    }
+   init() {
+    console.log('🚀 Sistema Cancha Ranger Inicializado');
+    this.inicializarFechas();
+    this.inicializarEventListeners();
+    this.inicializarComponentes();
+    this.inicializarSistemaReservaSimple();
+    // No necesitas llamar a inicializarSistemaAdmin() porque ya está en el constructor
+}
 
     inicializarFechas() {
         const hoy = new Date();
@@ -1083,7 +1096,570 @@ _Reserva solicitada a través del sistema web_`;
         const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(direccion)}`;
         window.open(url, '_blank');
     }
+
+
+// ===== SISTEMA DE ADMINISTRACIÓN =====
+inicializarSistemaAdmin() {
+    // Credenciales del administrador
+    this.adminCredentials = {
+        usuario: 'admin',
+        password: 'CanchaRanger2025'
+    };
+    
+    // Estados de reserva
+    this.estadosReserva = {
+        PENDIENTE: 'pendiente',
+        CONFIRMADA: 'confirmada', 
+        CANCELADA: 'cancelada'
+    };
 }
+
+// Mostrar modal de login admin
+mostrarLoginAdmin() {
+    document.getElementById('loginAdminModal').style.display = 'block';
+}
+
+// Acceder al panel admin
+accederPanelAdmin() {
+    const usuario = document.getElementById('adminUsuario').value;
+    const password = document.getElementById('adminPassword').value;
+    
+    if (usuario === this.adminCredentials.usuario && password === this.adminCredentials.password) {
+        document.getElementById('loginAdminModal').style.display = 'none';
+        this.mostrarPanelAdmin();
+        this.mostrarNotificacion('✅ Acceso concedido al panel de administración', 'success');
+    } else {
+        this.mostrarNotificacion('❌ Usuario o contraseña incorrectos', 'error');
+    }
+}
+
+// Mostrar panel de administración
+mostrarPanelAdmin() {
+    this.actualizarEstadisticasAdmin();
+    this.cargarReservasAdmin();
+    document.getElementById('panelAdmin').style.display = 'block';
+}
+
+// Actualizar estadísticas
+actualizarEstadisticasAdmin() {
+    const reservas = this.obtenerTodasLasReservas();
+    const hoy = new Date().toISOString().split('T')[0];
+    
+    const totalReservas = reservas.length;
+    const reservasHoy = reservas.filter(r => r.fecha === hoy).length;
+    const ingresosTotales = reservas.reduce((sum, r) => sum + r.total, 0);
+    
+    document.getElementById('totalReservas').textContent = totalReservas;
+    document.getElementById('reservasHoy').textContent = reservasHoy;
+    document.getElementById('ingresosTotales').textContent = ingresosTotales + ' Bs';
+}
+
+// Cargar todas las reservas
+cargarReservasAdmin(filtroEstado = 'todas', filtroFecha = '') {
+    const reservas = this.obtenerTodasLasReservas();
+    const listaReservas = document.getElementById('listaReservas');
+    
+    // Aplicar filtros
+    let reservasFiltradas = reservas;
+    
+    if (filtroEstado !== 'todas') {
+        reservasFiltradas = reservasFiltradas.filter(r => r.estado === filtroEstado);
+    }
+    
+    if (filtroFecha) {
+        reservasFiltradas = reservasFiltradas.filter(r => r.fecha === filtroFecha);
+    }
+    
+    // Ordenar por fecha más reciente
+    reservasFiltradas.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    
+    if (reservasFiltradas.length === 0) {
+        listaReservas.innerHTML = `
+            <div class="text-center" style="padding: 2rem; color: var(--text-secondary);">
+                <i class="fas fa-inbox" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                <p>No hay reservas que coincidan con los filtros</p>
+            </div>
+        `;
+        return;
+    }
+    
+    let html = '';
+    reservasFiltradas.forEach(reserva => {
+        const horariosTexto = reserva.horarios.map(grupo => 
+            `${grupo[0]}:00 - ${grupo[grupo.length - 1] + 1}:00 (${grupo.length}h)`
+        ).join(', ');
+        
+        html += `
+            <div class="reserva-item">
+                <div class="reserva-header">
+                    <div>
+                        <span class="reserva-codigo">${reserva.codigoReserva}</span>
+                        <span class="reserva-estado estado-${reserva.estado || 'pendiente'}">
+                            ${(reserva.estado || 'pendiente').toUpperCase()}
+                        </span>
+                    </div>
+                    <small>${new Date(reserva.timestamp).toLocaleString('es-ES')}</small>
+                </div>
+                
+                <div class="reserva-info">
+                    <div class="reserva-info-item">
+                        <span class="reserva-label">Cancha</span>
+                        <span class="reserva-value">${reserva.canchaNombre}</span>
+                    </div>
+                    <div class="reserva-info-item">
+                        <span class="reserva-label">Fecha</span>
+                        <span class="reserva-value">${this.formatearFechaLegible(reserva.fecha)}</span>
+                    </div>
+                    <div class="reserva-info-item">
+                        <span class="reserva-label">Horarios</span>
+                        <span class="reserva-value">${horariosTexto}</span>
+                    </div>
+                    <div class="reserva-info-item">
+                        <span class="reserva-label">Cliente</span>
+                        <span class="reserva-value">${reserva.usuario.nombre}</span>
+                    </div>
+                    <div class="reserva-info-item">
+                        <span class="reserva-label">Teléfono</span>
+                        <span class="reserva-value">${reserva.usuario.telefono}</span>
+                    </div>
+                    <div class="reserva-info-item">
+                        <span class="reserva-label">Total</span>
+                        <span class="reserva-value">${reserva.total} Bs</span>
+                    </div>
+                </div>
+                
+                <div class="reserva-actions">
+                    ${reserva.estado !== 'confirmada' ? `
+                        <button class="btn btn-success btn-sm" onclick="sistema.confirmarReservaAdmin('${reserva.id}')">
+                            <i class="fas fa-check"></i> Confirmar
+                        </button>
+                    ` : ''}
+                    
+                    ${reserva.estado !== 'cancelada' ? `
+                        <button class="btn btn-error btn-sm" onclick="sistema.cancelarReservaAdmin('${reserva.id}')">
+                            <i class="fas fa-times"></i> Cancelar
+                        </button>
+                    ` : ''}
+                    
+                    <button class="btn btn-secondary btn-sm" onclick="sistema.llamarCliente('${reserva.usuario.telefono}')">
+                        <i class="fas fa-phone"></i> Llamar
+                    </button>
+                    
+                    <button class="btn btn-error btn-sm" onclick="sistema.eliminarReservaAdmin('${reserva.id}')">
+                        <i class="fas fa-trash"></i> Eliminar
+                    </button>
+                </div>
+            </div>
+        `;
+    });
+    
+    listaReservas.innerHTML = html;
+}
+
+// Obtener todas las reservas
+obtenerTodasLasReservas() {
+    try {
+        return JSON.parse(localStorage.getItem('canchaRanger_reservas') || '[]');
+    } catch (error) {
+        console.error('Error obteniendo reservas:', error);
+        return [];
+    }
+}
+
+// Confirmar reserva
+confirmarReservaAdmin(reservaId) {
+    const reservas = this.obtenerTodasLasReservas();
+    const reservaIndex = reservas.findIndex(r => r.id === reservaId);
+    
+    if (reservaIndex !== -1) {
+        reservas[reservaIndex].estado = 'confirmada';
+        localStorage.setItem('canchaRanger_reservas', JSON.stringify(reservas));
+        
+        this.mostrarNotificacion('✅ Reserva confirmada exitosamente', 'success');
+        this.cargarReservasAdmin();
+        this.actualizarEstadisticasAdmin();
+        
+        // Aquí podrías enviar WhatsApp de confirmación al cliente
+    }
+}
+
+// Cancelar reserva  
+cancelarReservaAdmin(reservaId) {
+    if (!confirm('¿Estás seguro de que quieres cancelar esta reserva?')) return;
+    
+    const reservas = this.obtenerTodasLasReservas();
+    const reservaIndex = reservas.findIndex(r => r.id === reservaId);
+    
+    if (reservaIndex !== -1) {
+        reservas[reservaIndex].estado = 'cancelada';
+        localStorage.setItem('canchaRanger_reservas', JSON.stringify(reservas));
+        
+        this.mostrarNotificacion('✅ Reserva cancelada exitosamente', 'success');
+        this.cargarReservasAdmin();
+        this.actualizarEstadisticasAdmin();
+    }
+}
+
+// Eliminar reserva
+eliminarReservaAdmin(reservaId) {
+    if (!confirm('¿Estás seguro de que quieres ELIMINAR permanentemente esta reserva?')) return;
+    
+    const reservas = this.obtenerTodasLasReservas();
+    const reservasFiltradas = reservas.filter(r => r.id !== reservaId);
+    
+    localStorage.setItem('canchaRanger_reservas', JSON.stringify(reservasFiltradas));
+    
+    this.mostrarNotificacion('✅ Reserva eliminada exitosamente', 'success');
+    this.cargarReservasAdmin();
+    this.actualizarEstadisticasAdmin();
+}
+
+// Llamar al cliente
+llamarCliente(telefono) {
+    window.open(`tel:${telefono}`, '_self');
+}
+
+// Exportar reservas
+exportarReservas() {
+    const reservas = this.obtenerTodasLasReservas();
+    const csv = this.convertirReservasACSV(reservas);
+    
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `reservas-cancha-ranger-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    
+    this.mostrarNotificacion('📊 Reservas exportadas exitosamente', 'success');
+}
+
+// Convertir a CSV
+convertirReservasACSV(reservas) {
+    const headers = ['Código', 'Cancha', 'Fecha', 'Horarios', 'Cliente', 'Teléfono', 'Total', 'Estado', 'Fecha Solicitud'];
+    const rows = reservas.map(reserva => [
+        reserva.codigoReserva,
+        reserva.canchaNombre,
+        reserva.fecha,
+        reserva.horarios.map(g => `${g[0]}:00-${g[g.length-1]+1}:00`).join(';'),
+        reserva.usuario.nombre,
+        reserva.usuario.telefono,
+        reserva.total + ' Bs',
+        reserva.estado || 'pendiente',
+        new Date(reserva.timestamp).toLocaleString('es-ES')
+    ]);
+    
+    return [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+}
+
+
+
+
+// ===== SISTEMA DE ADMINISTRACIÓN =====
+
+// Mostrar modal de login admin
+mostrarLoginAdmin() {
+    document.getElementById('loginAdminModal').style.display = 'block';
+}
+
+// Acceder al panel admin
+accederPanelAdmin() {
+    const usuario = document.getElementById('adminUsuario').value;
+    const password = document.getElementById('adminPassword').value;
+    
+    if (usuario === this.adminCredentials.usuario && password === this.adminCredentials.password) {
+        document.getElementById('loginAdminModal').style.display = 'none';
+        this.mostrarPanelAdmin();
+        this.mostrarNotificacion('✅ Acceso concedido al panel de administración', 'success');
+    } else {
+        this.mostrarNotificacion('❌ Usuario o contraseña incorrectos', 'error');
+    }
+}
+
+// Mostrar panel de administración
+mostrarPanelAdmin() {
+    this.actualizarEstadisticasAdmin();
+    this.cargarReservasAdmin();
+    document.getElementById('panelAdmin').style.display = 'block';
+}
+
+// Actualizar estadísticas
+actualizarEstadisticasAdmin() {
+    const reservas = this.obtenerTodasLasReservas();
+    const hoy = new Date().toISOString().split('T')[0];
+    
+    const totalReservas = reservas.length;
+    const reservasHoy = reservas.filter(r => r.fecha === hoy).length;
+    const ingresosTotales = reservas.reduce((sum, r) => sum + (r.total || 0), 0);
+    
+    document.getElementById('totalReservas').textContent = totalReservas;
+    document.getElementById('reservasHoy').textContent = reservasHoy;
+    document.getElementById('ingresosTotales').textContent = ingresosTotales + ' Bs';
+}
+
+// Cargar todas las reservas
+cargarReservasAdmin(filtroEstado = 'todas', filtroFecha = '') {
+    const reservas = this.obtenerTodasLasReservas();
+    const listaReservas = document.getElementById('listaReservas');
+    
+    // Aplicar filtros
+    let reservasFiltradas = reservas;
+    
+    if (filtroEstado !== 'todas') {
+        reservasFiltradas = reservasFiltradas.filter(r => (r.estado || 'pendiente') === filtroEstado);
+    }
+    
+    if (filtroFecha) {
+        reservasFiltradas = reservasFiltradas.filter(r => r.fecha === filtroFecha);
+    }
+    
+    // Ordenar por fecha más reciente
+    reservasFiltradas.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    
+    if (reservasFiltradas.length === 0) {
+        listaReservas.innerHTML = `
+            <div class="text-center" style="padding: 2rem; color: var(--text-secondary);">
+                <i class="fas fa-inbox" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                <p>No hay reservas que coincidan con los filtros</p>
+            </div>
+        `;
+        return;
+    }
+    
+    let html = '';
+    reservasFiltradas.forEach(reserva => {
+        const horariosTexto = reserva.horarios.map(grupo => 
+            `${grupo[0]}:00 - ${grupo[grupo.length - 1] + 1}:00 (${grupo.length}h)`
+        ).join(', ');
+        
+        const estado = reserva.estado || 'pendiente';
+        
+        html += `
+            <div class="reserva-item">
+                <div class="reserva-header">
+                    <div>
+                        <span class="reserva-codigo">${reserva.codigoReserva}</span>
+                        <span class="reserva-estado estado-${estado}">
+                            ${estado.toUpperCase()}
+                        </span>
+                    </div>
+                    <small>${new Date(reserva.timestamp).toLocaleString('es-ES')}</small>
+                </div>
+                
+                <div class="reserva-info">
+                    <div class="reserva-info-item">
+                        <span class="reserva-label">Cancha</span>
+                        <span class="reserva-value">${reserva.canchaNombre}</span>
+                    </div>
+                    <div class="reserva-info-item">
+                        <span class="reserva-label">Fecha</span>
+                        <span class="reserva-value">${this.formatearFechaLegible(reserva.fecha)}</span>
+                    </div>
+                    <div class="reserva-info-item">
+                        <span class="reserva-label">Horarios</span>
+                        <span class="reserva-value">${horariosTexto}</span>
+                    </div>
+                    <div class="reserva-info-item">
+                        <span class="reserva-label">Cliente</span>
+                        <span class="reserva-value">${reserva.usuario.nombre}</span>
+                    </div>
+                    <div class="reserva-info-item">
+                        <span class="reserva-label">Teléfono</span>
+                        <span class="reserva-value">${reserva.usuario.telefono}</span>
+                    </div>
+                    <div class="reserva-info-item">
+                        <span class="reserva-label">Total</span>
+                        <span class="reserva-value">${reserva.total} Bs</span>
+                    </div>
+                </div>
+                
+                <div class="reserva-actions">
+                    ${estado !== 'confirmada' ? `
+                        <button class="btn btn-success btn-sm" onclick="sistema.confirmarReservaAdmin('${reserva.id}')">
+                            <i class="fas fa-check"></i> Confirmar
+                        </button>
+                    ` : ''}
+                    
+                    ${estado !== 'cancelada' ? `
+                        <button class="btn btn-error btn-sm" onclick="sistema.cancelarReservaAdmin('${reserva.id}')">
+                            <i class="fas fa-times"></i> Cancelar
+                        </button>
+                    ` : ''}
+                    
+                    <button class="btn btn-secondary btn-sm" onclick="sistema.llamarCliente('${reserva.usuario.telefono}')">
+                        <i class="fas fa-phone"></i> Llamar
+                    </button>
+                    
+                    <button class="btn btn-error btn-sm" onclick="sistema.eliminarReservaAdmin('${reserva.id}')">
+                        <i class="fas fa-trash"></i> Eliminar
+                    </button>
+                </div>
+            </div>
+        `;
+    });
+    
+    listaReservas.innerHTML = html;
+}
+
+// Obtener todas las reservas
+obtenerTodasLasReservas() {
+    try {
+        return JSON.parse(localStorage.getItem('canchaRanger_reservas') || '[]');
+    } catch (error) {
+        console.error('Error obteniendo reservas:', error);
+        return [];
+    }
+}
+
+// Confirmar reserva
+confirmarReservaAdmin(reservaId) {
+    const reservas = this.obtenerTodasLasReservas();
+    const reservaIndex = reservas.findIndex(r => r.id === reservaId);
+    
+    if (reservaIndex !== -1) {
+        reservas[reservaIndex].estado = 'confirmada';
+        localStorage.setItem('canchaRanger_reservas', JSON.stringify(reservas));
+        
+        this.mostrarNotificacion('✅ Reserva confirmada exitosamente', 'success');
+        this.cargarReservasAdmin();
+        this.actualizarEstadisticasAdmin();
+    }
+}
+
+// Cancelar reserva  
+cancelarReservaAdmin(reservaId) {
+    if (!confirm('¿Estás seguro de que quieres cancelar esta reserva?')) return;
+    
+    const reservas = this.obtenerTodasLasReservas();
+    const reservaIndex = reservas.findIndex(r => r.id === reservaId);
+    
+    if (reservaIndex !== -1) {
+        reservas[reservaIndex].estado = 'cancelada';
+        localStorage.setItem('canchaRanger_reservas', JSON.stringify(reservas));
+        
+        this.mostrarNotificacion('✅ Reserva cancelada exitosamente', 'success');
+        this.cargarReservasAdmin();
+        this.actualizarEstadisticasAdmin();
+    }
+}
+
+// Eliminar reserva
+eliminarReservaAdmin(reservaId) {
+    if (!confirm('¿Estás seguro de que quieres ELIMINAR permanentemente esta reserva?')) return;
+    
+    const reservas = this.obtenerTodasLasReservas();
+    const reservasFiltradas = reservas.filter(r => r.id !== reservaId);
+    
+    localStorage.setItem('canchaRanger_reservas', JSON.stringify(reservasFiltradas));
+    
+    this.mostrarNotificacion('✅ Reserva eliminada exitosamente', 'success');
+    this.cargarReservasAdmin();
+    this.actualizarEstadisticasAdmin();
+}
+
+// Llamar al cliente
+llamarCliente(telefono) {
+    window.open(`tel:${telefono}`, '_self');
+}
+
+// Exportar reservas
+exportarReservas() {
+    const reservas = this.obtenerTodasLasReservas();
+    const csv = this.convertirReservasACSV(reservas);
+    
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `reservas-cancha-ranger-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    
+    this.mostrarNotificacion('📊 Reservas exportadas exitosamente', 'success');
+}
+
+// Convertir a CSV
+convertirReservasACSV(reservas) {
+    const headers = ['Código', 'Cancha', 'Fecha', 'Horarios', 'Cliente', 'Teléfono', 'Total', 'Estado', 'Fecha Solicitud'];
+    const rows = reservas.map(reserva => [
+        reserva.codigoReserva,
+        reserva.canchaNombre,
+        reserva.fecha,
+        reserva.horarios.map(g => `${g[0]}:00-${g[g.length-1]+1}:00`).join(';'),
+        reserva.usuario.nombre,
+        reserva.usuario.telefono,
+        reserva.total + ' Bs',
+        reserva.estado || 'pendiente',
+        new Date(reserva.timestamp).toLocaleString('es-ES')
+    ]);
+    
+    return [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+}
+
+// Limpiar reservas antiguas
+limpiarReservasAntiguas() {
+    if (!confirm('¿Eliminar reservas de hace más de 30 días? Esta acción no se puede deshacer.')) return;
+    
+    const reservas = this.obtenerTodasLasReservas();
+    const fechaLimite = new Date();
+    fechaLimite.setDate(fechaLimite.getDate() - 30);
+    
+    const reservasActualizadas = reservas.filter(reserva => {
+        const fechaReserva = new Date(reserva.timestamp);
+        return fechaReserva > fechaLimite;
+    });
+    
+    localStorage.setItem('canchaRanger_reservas', JSON.stringify(reservasActualizadas));
+    
+    this.mostrarNotificacion('🧹 Reservas antiguas eliminadas', 'success');
+    this.cargarReservasAdmin();
+    this.actualizarEstadisticasAdmin();
+}
+
+}
+
+
+// ===== FUNCIONES GLOBALES PARA HTML =====
+function avanzarPasoSimple(paso) {
+    if (sistema) sistema.avanzarPasoSimple(paso);
+}
+
+function retrocederPasoSimple(paso) {
+    if (sistema) sistema.retrocederPasoSimple(paso);
+}
+
+function confirmarReservaWhatsApp() {
+    if (sistema) sistema.confirmarReservaWhatsApp();
+}
+
+function abrirGoogleMaps() {
+    if (sistema) sistema.abrirGoogleMaps();
+}
+
+// ===== FUNCIONES GLOBALES ADMIN =====
+function mostrarLoginAdmin() {
+    if (sistema) sistema.mostrarLoginAdmin();
+}
+
+function accederPanelAdmin() {
+    if (sistema) sistema.accederPanelAdmin();
+}
+
+function filtrarReservas() {
+    if (sistema) {
+        const estado = document.getElementById('filtroEstado').value;
+        const fecha = document.getElementById('filtroFecha').value;
+        sistema.cargarReservasAdmin(estado, fecha);
+    }
+}
+
+function exportarReservas() {
+    if (sistema) sistema.exportarReservas();
+}
+
+function limpiarReservasAntiguas() {
+    if (sistema) sistema.limpiarReservasAntiguas();
+}
+
 
 // ===== INICIALIZACIÓN GLOBAL =====
 let sistema;
@@ -1140,3 +1716,24 @@ notificationStyles.textContent = `
     }
 `;
 document.head.appendChild(notificationStyles);
+
+// ===== FUNCIONES GLOBALES ADMIN =====
+function mostrarLoginAdmin() {
+    if (sistema) sistema.mostrarLoginAdmin();
+}
+
+function accederPanelAdmin() {
+    if (sistema) sistema.accederPanelAdmin();
+}
+
+function filtrarReservas() {
+    if (sistema) {
+        const estado = document.getElementById('filtroEstado').value;
+        const fecha = document.getElementById('filtroFecha').value;
+        sistema.cargarReservasAdmin(estado, fecha);
+    }
+}
+
+function exportarReservas() {
+    if (sistema) sistema.exportarReservas();
+}
