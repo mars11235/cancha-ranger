@@ -1,4 +1,4 @@
-// ===== SISTEMA CANCHA RANGER - VERSIÓN CON CALENDARIO Y HORARIOS MÚLTIPLES =====
+// ===== SISTEMA CANCHA RANGER - VERSIÓN CORREGIDA Y COMPLETA =====
 
 class SistemaCanchaRanger {
     constructor() {
@@ -58,28 +58,28 @@ class SistemaCanchaRanger {
             }
         ];
 
-        // Nuevas propiedades para calendario
-        this.fechaActual = new Date();
-        this.mesActual = this.fechaActual.getMonth();
-        this.anoActual = this.fechaActual.getFullYear();
-        
-        // Estado de reserva actual mejorado
+        // Estado de reserva actual
         this.reservaActual = {
             cancha: null,
             fecha: null,
-            horarios: [], // Array para múltiples horarios
+            horarios: [],
             datosCliente: null
         };
+
+        // Calendario
+        this.fechaActual = new Date();
+        this.mesActual = this.fechaActual.getMonth();
+        this.anoActual = this.fechaActual.getFullYear();
 
         this.init();
     }
 
     init() {
+        console.log('🚀 Sistema Cancha Ranger Inicializado');
         this.inicializarFechas();
         this.inicializarEventListeners();
         this.inicializarComponentes();
         this.inicializarSistemaReservaSimple();
-        console.log('🚀 Sistema Cancha Ranger - Versión con Calendario y Horarios Múltiples Inicializada');
     }
 
     inicializarFechas() {
@@ -90,53 +90,142 @@ class SistemaCanchaRanger {
         pasadoManana.setDate(pasadoManana.getDate() + 2);
 
         // Formatear fechas para mostrar
-        document.getElementById('fechaHoy').textContent = hoy.getDate() + '/' + (hoy.getMonth() + 1);
-        document.getElementById('fechaManana').textContent = manana.getDate() + '/' + (manana.getMonth() + 1);
-        document.getElementById('fechaPasadoManana').textContent = pasadoManana.getDate() + '/' + (pasadoManana.getMonth() + 1);
+        if (document.getElementById('fechaHoy')) {
+            document.getElementById('fechaHoy').textContent = hoy.getDate() + '/' + (hoy.getMonth() + 1);
+        }
+        if (document.getElementById('fechaManana')) {
+            document.getElementById('fechaManana').textContent = manana.getDate() + '/' + (manana.getMonth() + 1);
+        }
+        if (document.getElementById('fechaPasadoManana')) {
+            document.getElementById('fechaPasadoManana').textContent = pasadoManana.getDate() + '/' + (pasadoManana.getMonth() + 1);
+        }
         
         // Nombre del día para pasado mañana
         const dias = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
-        document.getElementById('diaPasadoManana').textContent = dias[pasadoManana.getDay()].substring(0, 3);
+        if (document.getElementById('diaPasadoManana')) {
+            document.getElementById('diaPasadoManana').textContent = dias[pasadoManana.getDay()].substring(0, 3);
+        }
+    }
+
+    inicializarEventListeners() {
+        // Filtros de canchas
+        document.querySelectorAll('.filtro-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const tipo = e.target.dataset.tipo;
+                this.filtrarCanchas(tipo);
+                
+                document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active');
+            });
+        });
+
+        // Cerrar modales
+        document.querySelectorAll('.close').forEach(closeBtn => {
+            closeBtn.addEventListener('click', function() {
+                this.closest('.modal').style.display = 'none';
+            });
+        });
+
+        // Cerrar modal al hacer click fuera
+        window.addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal')) {
+                e.target.style.display = 'none';
+            }
+        });
+
+        // Menú hamburguesa
+        const hamburger = document.querySelector('.hamburger');
+        const navMenu = document.querySelector('.nav-menu');
+        
+        if (hamburger) {
+            hamburger.addEventListener('click', () => {
+                hamburger.classList.toggle('active');
+                if (navMenu) navMenu.classList.toggle('active');
+            });
+        }
+
+        // Navegación suave
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                    
+                    if (hamburger) hamburger.classList.remove('active');
+                    if (navMenu) navMenu.classList.remove('active');
+                }
+            });
+        });
+
+        // Header scroll effect
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('.header-profesional');
+            if (window.scrollY > 100) {
+                header.classList.add('header-scrolled');
+            } else {
+                header.classList.remove('header-scrolled');
+            }
+        });
+    }
+
+    inicializarComponentes() {
+        this.generarHTMLCanchas();
+        this.generarCanchasRapidas();
+        this.actualizarEstadoTiempoReal();
+        this.inicializarCalendario();
     }
 
     // ===== CALENDARIO INTERACTIVO =====
     inicializarCalendario() {
         this.actualizarCalendario();
         
-        // Event listeners para navegación del calendario
-        document.getElementById('btnMesAnterior').addEventListener('click', () => {
-            this.mesActual--;
-            if (this.mesActual < 0) {
-                this.mesActual = 11;
-                this.anoActual--;
-            }
-            this.actualizarCalendario();
-        });
+        const btnMesAnterior = document.getElementById('btnMesAnterior');
+        const btnMesSiguiente = document.getElementById('btnMesSiguiente');
 
-        document.getElementById('btnMesSiguiente').addEventListener('click', () => {
-            this.mesActual++;
-            if (this.mesActual > 11) {
-                this.mesActual = 0;
-                this.anoActual++;
-            }
-            this.actualizarCalendario();
-        });
+        if (btnMesAnterior) {
+            btnMesAnterior.addEventListener('click', () => {
+                this.mesActual--;
+                if (this.mesActual < 0) {
+                    this.mesActual = 11;
+                    this.anoActual--;
+                }
+                this.actualizarCalendario();
+            });
+        }
+
+        if (btnMesSiguiente) {
+            btnMesSiguiente.addEventListener('click', () => {
+                this.mesActual++;
+                if (this.mesActual > 11) {
+                    this.mesActual = 0;
+                    this.anoActual++;
+                }
+                this.actualizarCalendario();
+            });
+        }
     }
 
     actualizarCalendario() {
         const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
                       'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
         
-        // Actualizar header
-        document.getElementById('mesActual').textContent = `${meses[this.mesActual]} ${this.anoActual}`;
+        const mesActualElement = document.getElementById('mesActual');
+        if (mesActualElement) {
+            mesActualElement.textContent = `${meses[this.mesActual]} ${this.anoActual}`;
+        }
         
-        // Generar días del calendario
+        const calendarioDias = document.getElementById('calendarioDias');
+        if (!calendarioDias) return;
+
         const primerDia = new Date(this.anoActual, this.mesActual, 1);
         const ultimoDia = new Date(this.anoActual, this.mesActual + 1, 0);
         const diasEnMes = ultimoDia.getDate();
         const primerDiaSemana = primerDia.getDay();
         
-        const calendarioDias = document.getElementById('calendarioDias');
         let html = '';
         
         // Días vacíos al inicio
@@ -170,7 +259,7 @@ class SistemaCanchaRanger {
 
     seleccionarFechaCalendario(fechaStr) {
         this.reservaActual.fecha = fechaStr;
-        this.reservaActual.horarios = []; // Reset horarios al cambiar fecha
+        this.reservaActual.horarios = [];
         this.actualizarCalendario();
         this.actualizarResumenRapido();
         this.mostrarNotificacion(`📅 Fecha seleccionada: ${this.formatearFechaLegible(fechaStr)}`, 'success');
@@ -203,7 +292,6 @@ class SistemaCanchaRanger {
         
         contenedor.innerHTML = html;
         
-        // Actualizar información de fecha
         const fechaInfo = document.getElementById('fechaSeleccionadaInfo');
         if (fechaInfo) {
             fechaInfo.textContent = this.formatearFechaLegible(this.reservaActual.fecha);
@@ -216,11 +304,9 @@ class SistemaCanchaRanger {
         const index = this.reservaActual.horarios.indexOf(hora);
         
         if (index === -1) {
-            // Agregar horario
             this.reservaActual.horarios.push(hora);
             this.reservaActual.horarios.sort((a, b) => a - b);
         } else {
-            // Remover horario
             this.reservaActual.horarios.splice(index, 1);
         }
         
@@ -231,11 +317,9 @@ class SistemaCanchaRanger {
     esHorarioConsecutivo(hora) {
         if (!this.reservaActual.horarios.includes(hora)) return false;
         
-        // Verificar si es parte de una secuencia consecutiva
         const horarios = this.reservaActual.horarios;
         const index = horarios.indexOf(hora);
         
-        // Verificar si tiene vecinos consecutivos
         const tieneAnterior = index > 0 && horarios[index - 1] === hora - 1;
         const tieneSiguiente = index < horarios.length - 1 && horarios[index + 1] === hora + 1;
         
@@ -323,7 +407,6 @@ class SistemaCanchaRanger {
     // ===== SISTEMA DE RESERVA SIMPLE =====
     inicializarSistemaReservaSimple() {
         this.inicializarCalendario();
-        // Establecer fecha por defecto (hoy)
         const hoyStr = new Date().toISOString().split('T')[0];
         this.seleccionarFechaCalendario(hoyStr);
     }
@@ -349,7 +432,6 @@ class SistemaCanchaRanger {
 
         this.reservaActual.cancha = cancha;
         
-        // Actualizar UI
         document.querySelectorAll('.cancha-rapida-btn').forEach(btn => {
             btn.classList.remove('seleccionada');
         });
@@ -396,7 +478,6 @@ class SistemaCanchaRanger {
 
     // ===== CONFIRMACIÓN MEJORADA =====
     avanzarPasoSimple(paso) {
-        // Validaciones antes de avanzar
         if (paso === 2 && !this.validarPaso1()) {
             this.mostrarNotificacion('❌ Selecciona cancha y fecha primero', 'error');
             return;
@@ -407,15 +488,12 @@ class SistemaCanchaRanger {
             return;
         }
 
-        // Ocultar todos los pasos
         document.querySelectorAll('.reserva-paso-simple').forEach(paso => {
             paso.classList.remove('active');
         });
         
-        // Mostrar paso actual
         document.getElementById(`pasoSimple${paso}`).classList.add('active');
 
-        // Inicializar componentes específicos del paso
         if (paso === 2) {
             this.inicializarHorariosMultiples();
         } else if (paso === 3) {
@@ -523,7 +601,6 @@ class SistemaCanchaRanger {
             return;
         }
 
-        // Crear objeto de reserva mejorado
         const horariosAgrupados = this.agruparHorariosConsecutivos();
         const total = horariosAgrupados.reduce((sum, grupo) => {
             return sum + (grupo.length * this.reservaActual.cancha.precio);
@@ -541,7 +618,6 @@ class SistemaCanchaRanger {
             timestamp: new Date().toISOString()
         };
 
-        // Enviar por WhatsApp
         this.enviarReservaWhatsApp(reserva);
     }
 
@@ -549,13 +625,9 @@ class SistemaCanchaRanger {
         const mensaje = this.generarMensajeWhatsApp(reserva);
         const url = `https://wa.me/${this.config.adminNumber}?text=${encodeURIComponent(mensaje)}`;
         
-        // Abrir WhatsApp
         window.open(url, '_blank');
-        
-        // Mostrar confirmación
         this.mostrarConfirmacionReserva(reserva);
         
-        // Reiniciar sistema después de 2 segundos
         setTimeout(() => {
             this.reiniciarSistemaReserva();
         }, 2000);
@@ -595,6 +667,7 @@ _Reserva solicitada a través del sistema web_`;
 
     mostrarConfirmacionReserva(reserva) {
         const modalBody = document.getElementById('confirmacionBody');
+        if (!modalBody) return;
         
         modalBody.innerHTML = `
             <div class="text-center">
@@ -649,18 +722,15 @@ _Reserva solicitada a través del sistema web_`;
             datosCliente: null
         };
         
-        // Resetear UI
         document.querySelectorAll('.cancha-rapida-btn').forEach(btn => {
             btn.classList.remove('seleccionada');
         });
         
-        // Resetear formulario
         document.getElementById('nombreSimple').value = '';
         document.getElementById('telefonoSimple').value = '';
         document.getElementById('emailSimple').value = '';
         document.getElementById('notasSimple').value = '';
         
-        // Volver al paso 1
         this.avanzarPasoSimple(1);
         this.actualizarCalendario();
         this.actualizarResumenRapido();
@@ -742,7 +812,6 @@ _Reserva solicitada a través del sistema web_`;
     reservarCanchaDesdeCard(canchaId) {
         this.seleccionarCanchaRapida(canchaId);
         
-        // Scroll a la sección de reservas
         document.getElementById('reservas').scrollIntoView({
             behavior: 'smooth',
             block: 'start'
@@ -764,6 +833,8 @@ _Reserva solicitada a través del sistema web_`;
         if (!cancha) return;
 
         const modalBody = document.getElementById('detallesCanchaBody');
+        if (!modalBody) return;
+
         modalBody.innerHTML = `
             <div class="detalles-cancha-container">
                 <div class="detalles-imagen">
@@ -808,9 +879,8 @@ _Reserva solicitada a través del sistema web_`;
         const estadoCanchas = document.getElementById('estadoCanchas');
         if (!estadoCanchas) return;
 
-        // Simular estado (en un sistema real esto vendría de una base de datos)
         const estadoHTML = this.canchas.map(cancha => {
-            const reservasHoy = Math.random() > 0.7 ? 1 : 0; // Simulación
+            const reservasHoy = Math.random() > 0.7 ? 1 : 0;
             const estado = reservasHoy > 0 ? 'ocupado' : 'disponible';
             
             return `
@@ -826,71 +896,9 @@ _Reserva solicitada a través del sistema web_`;
     }
 
     // ===== FUNCIONES UTILITARIAS =====
-    inicializarEventListeners() {
-        // Filtros de canchas
-        document.querySelectorAll('.filtro-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const tipo = e.target.dataset.tipo;
-                this.filtrarCanchas(tipo);
-                
-                // Actualizar estado de botones
-                document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('active'));
-                e.target.classList.add('active');
-            });
-        });
-
-        // Cerrar modales
-        document.querySelectorAll('.close').forEach(closeBtn => {
-            closeBtn.addEventListener('click', function() {
-                this.closest('.modal').style.display = 'none';
-            });
-        });
-
-        // Cerrar modal al hacer click fuera
-        window.addEventListener('click', (e) => {
-            if (e.target.classList.contains('modal')) {
-                e.target.style.display = 'none';
-            }
-        });
-
-        // Menú hamburguesa
-        const hamburger = document.querySelector('.hamburger');
-        const navMenu = document.querySelector('.nav-menu');
-        
-        hamburger?.addEventListener('click', () => {
-            hamburger.classList.toggle('active');
-            navMenu.classList.toggle('active');
-        });
-
-        // Navegación suave
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                    
-                    // Cerrar menú móvil
-                    hamburger?.classList.remove('active');
-                    navMenu?.classList.remove('active');
-                }
-            });
-        });
-    }
-
-    inicializarComponentes() {
-        this.generarHTMLCanchas();
-        this.generarCanchasRapidas();
-        this.actualizarEstadoTiempoReal();
-    }
-
     verificarDisponibilidadHora(fecha, hora) {
         if (!this.reservaActual.cancha) return true;
 
-        // Simulación de disponibilidad (en sistema real verificaría en base de datos)
         const reservasSimuladas = [
             { canchaId: 1, fecha: this.reservaActual.fecha, horaInicio: 16, horaFin: 18 },
             { canchaId: 2, fecha: this.reservaActual.fecha, horaInicio: 18, horaFin: 20 }
@@ -951,7 +959,6 @@ _Reserva solicitada a través del sistema web_`;
         
         document.body.appendChild(notification);
         
-        // Auto-eliminar después de 5 segundos
         setTimeout(() => {
             notification.style.animation = 'slideOutRight 0.3s ease-in';
             setTimeout(() => {
@@ -975,27 +982,27 @@ let sistema;
 document.addEventListener('DOMContentLoaded', function() {
     sistema = new SistemaCanchaRanger();
     
-    // Inicializar servicios
     if (typeof WhatsAppService !== 'undefined') {
         window.whatsappService = new WhatsAppService();
+        window.whatsappService.init();
     }
 });
 
 // ===== FUNCIONES GLOBALES PARA HTML =====
 function avanzarPasoSimple(paso) {
-    sistema.avanzarPasoSimple(paso);
+    if (sistema) sistema.avanzarPasoSimple(paso);
 }
 
 function retrocederPasoSimple(paso) {
-    sistema.retrocederPasoSimple(paso);
+    if (sistema) sistema.retrocederPasoSimple(paso);
 }
 
 function confirmarReservaWhatsApp() {
-    sistema.confirmarReservaWhatsApp();
+    if (sistema) sistema.confirmarReservaWhatsApp();
 }
 
 function abrirGoogleMaps() {
-    sistema.abrirGoogleMaps();
+    if (sistema) sistema.abrirGoogleMaps();
 }
 
 // Agregar estilos CSS para las notificaciones
