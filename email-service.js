@@ -1,3 +1,4 @@
+
 // ===== SERVICIO DE EMAIL - CANCHA RANGER =====
 class EmailService {
     constructor() {
@@ -88,7 +89,6 @@ class EmailService {
             contacto_telefono1: '73811600',
             contacto_telefono2: '73220922'
         };
-
         try {
             await this.simularEnvioEmail(templateParams);
             console.log('📧 Email de cancelación enviado:', templateParams);
@@ -150,4 +150,4 @@ class EmailService {
             day: 'numeric'
         });
     }
-}
+ }

@@ -1,3 +1,4 @@
+
 // ===== SERVICIO WHATSAPP MEJORADO - 100% FUNCIONAL =====
 class WhatsAppService {
     constructor() {
@@ -213,4 +214,5 @@ ${horariosTexto}
         
         document.body.appendChild(botonWhatsApp);
     }
-}
+
+     }
