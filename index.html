@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -29,12 +28,12 @@
                     <li><a href="#reservas" class="nav-link btn-reserva-nav"><i class="fas fa-calendar-plus"></i> RESERVAR YA</a></li>
                     <li><a href="#contacto" class="nav-link"><i class="fas fa-phone"></i> CONTACTO</a></li>
                 </ul>
-               <div class="nav-actions">
-    <button class="btn-login" id="btnLogin" onclick="mostrarLoginAdmin()">
-        <i class="fas fa-user-shield"></i>
-        <span id="loginText">Panel Admin</span>
-    </button>
-</div>
+                <div class="nav-actions">
+                    <button class="btn-login" id="btnLogin" onclick="mostrarLoginAdmin()">
+                        <i class="fas fa-user-shield"></i>
+                        <span id="loginText">Panel Admin</span>
+                    </button>
+                </div>
                 <div class="hamburger">
                     <span class="bar"></span>
                     <span class="bar"></span>
@@ -240,62 +239,64 @@
                     </div>
                 </div>
 
-                <!-- Paso 3: Datos del Cliente y Confirmación -->
-<div class="reserva-paso-simple" id="pasoSimple3">
-    <div class="paso-indicador">
-        <span class="paso-numero">3</span>
-        <span class="paso-texto">Tus datos y confirmación</span>
-    </div>
+                <!-- Paso 3: Datos del Cliente -->
+                <div class="reserva-paso-simple" id="pasoSimple3">
+                    <div class="paso-indicador">
+                        <span class="paso-numero">3</span>
+                        <span class="paso-texto">Tus datos y confirmación</span>
+                    </div>
 
-    <div class="datos-cliente-simple">
-        <h3><i class="fas fa-user"></i> Completa tus datos</h3>
-        <p>Necesitamos esta información para confirmar tu reserva</p>
-        
-        <div class="formulario-simple">
-            <div class="input-grupo">
-                <label for="nombreSimple"><i class="fas fa-user"></i> Nombre completo *</label>
-                <input type="text" id="nombreSimple" placeholder="Ej: Juan Pérez" required>
-            </div>
-            
-            <div class="input-grupo">
-                <label for="telefonoSimple"><i class="fas fa-phone"></i> Teléfono *</label>
-                <input type="tel" id="telefonoSimple" placeholder="Ej: 73811600" required>
-            </div>
-            
-            <div class="input-grupo">
-                <label for="emailSimple"><i class="fas fa-envelope"></i> Email (opcional)</label>
-                <input type="email" id="emailSimple" placeholder="Ej: juan@ejemplo.com">
-            </div>
-            
-            <div class="input-grupo">
-                <label for="notasSimple"><i class="fas fa-sticky-note"></i> Notas adicionales</label>
-                <textarea id="notasSimple" placeholder="Ej: Vamos a ser 8 personas..."></textarea>
+                    <div class="datos-cliente-simple">
+                        <h3><i class="fas fa-user"></i> Completa tus datos</h3>
+                        <p>Necesitamos esta información para confirmar tu reserva</p>
+                        
+                        <div class="formulario-simple">
+                            <div class="input-grupo">
+                                <label for="nombreSimple"><i class="fas fa-user"></i> Nombre completo *</label>
+                                <input type="text" id="nombreSimple" placeholder="Ej: Juan Pérez" required>
+                            </div>
+                            
+                            <div class="input-grupo">
+                                <label for="telefonoSimple"><i class="fas fa-phone"></i> Teléfono *</label>
+                                <input type="tel" id="telefonoSimple" placeholder="Ej: 73811600" required>
+                            </div>
+                            
+                            <div class="input-grupo">
+                                <label for="emailSimple"><i class="fas fa-envelope"></i> Email (opcional)</label>
+                                <input type="email" id="emailSimple" placeholder="Ej: juan@ejemplo.com">
+                            </div>
+                            
+                            <div class="input-grupo">
+                                <label for="notasSimple"><i class="fas fa-sticky-note"></i> Notas adicionales</label>
+                                <textarea id="notasSimple" placeholder="Ej: Vamos a ser 8 personas..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="confirmacion-final">
+                        <div class="resumen-final" id="resumenFinal">
+                            <!-- Resumen se llena automáticamente -->
+                        </div>
+
+                        <div class="confirmacion-acciones">
+                            <div class="confirmacion-info">
+                                <i class="fas fa-info-circle"></i>
+                                <span>Al confirmar, se enviará automáticamente al administrador por WhatsApp</span>
+                            </div>
+                            
+                            <div class="botones-confirmacion">
+                                <button class="btn btn-secondary" onclick="retrocederPasoSimple(2)">
+                                    <i class="fas fa-edit"></i> Modificar horarios
+                                </button>
+                                <button class="btn btn-success" onclick="confirmarReservaWhatsApp()">
+                                    <i class="fab fa-whatsapp"></i> Confirmar y enviar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-
-    <div class="confirmacion-final">
-        <div class="resumen-final" id="resumenFinal">
-            <!-- Resumen se llena automáticamente -->
-        </div>
-
-        <div class="confirmacion-acciones">
-            <div class="confirmacion-info">
-                <i class="fas fa-info-circle"></i>
-                <span>Al confirmar, se enviará automáticamente al administrador por WhatsApp</span>
-            </div>
-            
-            <div class="botones-confirmacion">
-                <button class="btn btn-secondary" onclick="retrocederPasoSimple(2)">
-                    <i class="fas fa-edit"></i> Modificar horarios
-                </button>
-                <button class="btn btn-success" onclick="confirmarReservaWhatsApp()">
-                    <i class="fab fa-whatsapp"></i> Confirmar y enviar
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
     </section>
 
     <!-- Sección Contacto MEJORADA -->
@@ -451,186 +452,99 @@
         </div>
     </div>
 
+    <!-- Modal de Login para Admin -->
+    <div id="loginAdminModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-lock"></i> Acceso Administrador</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="login-form">
+                    <div class="input-grupo">
+                        <label for="adminUsuario"><i class="fas fa-user"></i> Usuario</label>
+                        <input type="text" id="adminUsuario" placeholder="Usuario administrador" value="admin">
+                    </div>
+                    <div class="input-grupo">
+                        <label for="adminPassword"><i class="fas fa-key"></i> Contraseña</label>
+                        <input type="password" id="adminPassword" placeholder="Contraseña" value="CanchaRanger2025">
+                    </div>
+                    <button class="btn btn-primary btn-block" onclick="accederPanelAdmin()">
+                        <i class="fas fa-sign-in-alt"></i> Acceder al Panel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Panel de Administración -->
+    <div id="panelAdmin" class="modal modal-detalles">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-tachometer-alt"></i> Panel de Administración - Cancha Ranger</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <!-- Estadísticas Rápidas -->
+                <div class="admin-stats">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-calendar-check"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-number" id="totalReservas">0</span>
+                            <span class="stat-label">Total Reservas</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-money-bill-wave"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-number" id="ingresosTotales">0 Bs</span>
+                            <span class="stat-label">Ingresos Totales</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-number" id="reservasHoy">0</span>
+                            <span class="stat-label">Reservas Hoy</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filtros -->
+                <div class="admin-filters">
+                    <select id="filtroEstado" onchange="filtrarReservas()">
+                        <option value="todas">Todas las reservas</option>
+                        <option value="pendiente">Pendientes</option>
+                        <option value="confirmada">Confirmadas</option>
+                        <option value="cancelada">Canceladas</option>
+                    </select>
+                    <input type="date" id="filtroFecha" onchange="filtrarReservas()">
+                    <button class="btn btn-secondary" onclick="exportarReservas()">
+                        <i class="fas fa-download"></i> Exportar
+                    </button>
+                    <button class="btn btn-error" onclick="limpiarReservasAntiguas()">
+                        <i class="fas fa-broom"></i> Limpiar Antiguas
+                    </button>
+                </div>
+
+                <!-- Lista de Reservas -->
+                <div class="reservas-list" id="listaReservas">
+                    <div class="text-center" style="padding: 2rem; color: var(--text-secondary);">
+                        <i class="fas fa-inbox" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                        <p>Cargando reservas...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="whatsapp-service.js"></script>
     <script src="script.js"></script>
-
-
-    <!-- Modal de Login para Admin -->
-<div id="loginAdminModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3><i class="fas fa-lock"></i> Acceso Administrador</h3>
-            <span class="close">&times;</span>
-        </div>
-        <div class="modal-body">
-            <div class="login-form">
-                <div class="input-grupo">
-                    <label for="adminUsuario"><i class="fas fa-user"></i> Usuario</label>
-                    <input type="text" id="adminUsuario" placeholder="Usuario administrador">
-                </div>
-                <div class="input-grupo">
-                    <label for="adminPassword"><i class="fas fa-key"></i> Contraseña</label>
-                    <input type="password" id="adminPassword" placeholder="Contraseña">
-                </div>
-                <button class="btn btn-primary btn-block" onclick="accederPanelAdmin()">
-                    <i class="fas fa-sign-in-alt"></i> Acceder al Panel
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Panel de Administración -->
-<div id="panelAdmin" class="modal modal-detalles">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3><i class="fas fa-tachometer-alt"></i> Panel de Administración</h3>
-            <span class="close">&times;</span>
-        </div>
-        <div class="modal-body">
-            <!-- Estadísticas Rápidas -->
-            <div class="admin-stats">
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-calendar-check"></i>
-                    </div>
-                    <div class="stat-info">
-                        <span class="stat-number" id="totalReservas">0</span>
-                        <span class="stat-label">Total Reservas</span>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-money-bill-wave"></i>
-                    </div>
-                    <div class="stat-info">
-                        <span class="stat-number" id="ingresosTotales">0 Bs</span>
-                        <span class="stat-label">Ingresos Totales</span>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-clock"></i>
-                    </div>
-                    <div class="stat-info">
-                        <span class="stat-number" id="reservasHoy">0</span>
-                        <span class="stat-label">Reservas Hoy</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Filtros -->
-            <div class="admin-filters">
-                <select id="filtroEstado" onchange="filtrarReservas()">
-                    <option value="todas">Todas las reservas</option>
-                    <option value="pendiente">Pendientes</option>
-                    <option value="confirmada">Confirmadas</option>
-                    <option value="cancelada">Canceladas</option>
-                </select>
-                <input type="date" id="filtroFecha" onchange="filtrarReservas()">
-                <button class="btn btn-secondary" onclick="exportarReservas()">
-                    <i class="fas fa-download"></i> Exportar
-                </button>
-            </div>
-
-            <!-- Lista de Reservas -->
-            <div class="reservas-list" id="listaReservas">
-                <!-- Las reservas se cargan aquí -->
-            </div>
-        </div>
-    </div>
-</div>
-
-
-<!-- Modal de Login para Admin -->
-<div id="loginAdminModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3><i class="fas fa-lock"></i> Acceso Administrador</h3>
-            <span class="close">&times;</span>
-        </div>
-        <div class="modal-body">
-            <div class="login-form">
-                <div class="input-grupo">
-                    <label for="adminUsuario"><i class="fas fa-user"></i> Usuario</label>
-                    <input type="text" id="adminUsuario" placeholder="Usuario administrador" value="admin">
-                </div>
-                <div class="input-grupo">
-                    <label for="adminPassword"><i class="fas fa-key"></i> Contraseña</label>
-                    <input type="password" id="adminPassword" placeholder="Contraseña" value="CanchaRanger2025">
-                </div>
-                <button class="btn btn-primary btn-block" onclick="accederPanelAdmin()">
-                    <i class="fas fa-sign-in-alt"></i> Acceder al Panel
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Panel de Administración -->
-<div id="panelAdmin" class="modal modal-detalles">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3><i class="fas fa-tachometer-alt"></i> Panel de Administración - Cancha Ranger</h3>
-            <span class="close">&times;</span>
-        </div>
-        <div class="modal-body">
-            <!-- Estadísticas Rápidas -->
-            <div class="admin-stats">
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-calendar-check"></i>
-                    </div>
-                    <div class="stat-info">
-                        <span class="stat-number" id="totalReservas">0</span>
-                        <span class="stat-label">Total Reservas</span>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-money-bill-wave"></i>
-                    </div>
-                    <div class="stat-info">
-                        <span class="stat-number" id="ingresosTotales">0 Bs</span>
-                        <span class="stat-label">Ingresos Totales</span>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-clock"></i>
-                    </div>
-                    <div class="stat-info">
-                        <span class="stat-number" id="reservasHoy">0</span>
-                        <span class="stat-label">Reservas Hoy</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Filtros -->
-            <div class="admin-filters">
-                <select id="filtroEstado" onchange="filtrarReservas()">
-                    <option value="todas">Todas las reservas</option>
-                    <option value="pendiente">Pendientes</option>
-                    <option value="confirmada">Confirmadas</option>
-                    <option value="cancelada">Canceladas</option>
-                </select>
-                <input type="date" id="filtroFecha" onchange="filtrarReservas()">
-                <button class="btn btn-secondary" onclick="exportarReservas()">
-                    <i class="fas fa-download"></i> Exportar
-                </button>
-                <button class="btn btn-error" onclick="limpiarReservasAntiguas()">
-                    <i class="fas fa-broom"></i> Limpiar Antiguas
-                </button>
-            </div>
-
-            <!-- Lista de Reservas -->
-            <div class="reservas-list" id="listaReservas">
-                <div class="text-center" style="padding: 2rem; color: var(--text-secondary);">
-                    <i class="fas fa-inbox" style="font-size: 3rem; margin-bottom: 1rem;"></i>
-                    <p>Cargando reservas...</p>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 </body>
+</html>
