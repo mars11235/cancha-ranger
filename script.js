@@ -692,6 +692,7 @@ class SistemaCanchaRanger {
     }
 
     // ===== GENERAR RESERVA COMPLETA =====
+// ===== GENERAR RESERVA COMPLETA - VERSIÓN MEJORADA =====
 generarReservaCompleta() {
     const horariosAgrupados = this.agruparHorariosConsecutivos();
     const total = horariosAgrupados.reduce((sum, grupo) => {
@@ -704,9 +705,10 @@ generarReservaCompleta() {
         canchaNombre: this.reservaActual.cancha.nombre,
         fecha: this.reservaActual.fecha,
         horarios: horariosAgrupados,
-        usuario: this.reservaActual.datosCliente,
+        usuario: this.reservaActual.datosCliente || {},
         total: total,
         codigoReserva: this.generarCodigoReserva(),
+        estado: 'pendiente', // Estado por defecto
         timestamp: new Date().toISOString()
     };
 }
@@ -744,14 +746,33 @@ async enviarReservaAlDueño(reserva) {
 }
 
 // ===== GUARDAR EN HISTORIAL =====
+// ===== GUARDAR EN HISTORIAL - VERSIÓN MEJORADA =====
 guardarReservaEnHistorial(reserva) {
     try {
+        // Asegurar que la reserva tenga todos los campos necesarios
+        const reservaCompleta = {
+            id: reserva.id || this.generarId(),
+            canchaId: reserva.canchaId,
+            canchaNombre: reserva.canchaNombre,
+            fecha: reserva.fecha,
+            horarios: reserva.horarios || [],
+            usuario: reserva.usuario || {},
+            total: reserva.total || 0,
+            codigoReserva: reserva.codigoReserva || this.generarCodigoReserva(),
+            estado: reserva.estado || 'pendiente',
+            timestamp: reserva.timestamp || new Date().toISOString()
+        };
+
         const historial = JSON.parse(localStorage.getItem('canchaRanger_reservas') || '[]');
-        historial.push(reserva);
+        historial.push(reservaCompleta);
         localStorage.setItem('canchaRanger_reservas', JSON.stringify(historial));
-        console.log('💾 Reserva guardada en historial');
+        
+        console.log('💾 Reserva guardada en historial:', reservaCompleta);
+        return true;
+        
     } catch (error) {
-        console.error('Error guardando en historial:', error);
+        console.error('❌ Error guardando en historial:', error);
+        return false;
     }
 }
 
@@ -1155,6 +1176,7 @@ actualizarEstadisticasAdmin() {
 }
 
 // Cargar todas las reservas
+// Cargar todas las reservas - VERSIÓN CORREGIDA
 cargarReservasAdmin(filtroEstado = 'todas', filtroFecha = '') {
     const reservas = this.obtenerTodasLasReservas();
     const listaReservas = document.getElementById('listaReservas');
@@ -1163,7 +1185,7 @@ cargarReservasAdmin(filtroEstado = 'todas', filtroFecha = '') {
     let reservasFiltradas = reservas;
     
     if (filtroEstado !== 'todas') {
-        reservasFiltradas = reservasFiltradas.filter(r => r.estado === filtroEstado);
+        reservasFiltradas = reservasFiltradas.filter(r => (r.estado || 'pendiente') === filtroEstado);
     }
     
     if (filtroFecha) {
@@ -1185,30 +1207,38 @@ cargarReservasAdmin(filtroEstado = 'todas', filtroFecha = '') {
     
     let html = '';
     reservasFiltradas.forEach(reserva => {
-        const horariosTexto = reserva.horarios.map(grupo => 
-            `${grupo[0]}:00 - ${grupo[grupo.length - 1] + 1}:00 (${grupo.length}h)`
-        ).join(', ');
+        // CORRECCIÓN: Verificar que horarios existe y es un array
+        const horarios = reserva.horarios || [];
+        const horariosTexto = horarios.length > 0 
+            ? horarios.map(grupo => 
+                `${grupo[0]}:00 - ${grupo[grupo.length - 1] + 1}:00 (${grupo.length}h)`
+            ).join(', ')
+            : 'Horarios no disponibles';
+        
+        const estado = reserva.estado || 'pendiente';
+        const total = reserva.total || 0;
+        const usuario = reserva.usuario || { nombre: 'No disponible', telefono: 'No disponible' };
         
         html += `
             <div class="reserva-item">
                 <div class="reserva-header">
                     <div>
-                        <span class="reserva-codigo">${reserva.codigoReserva}</span>
-                        <span class="reserva-estado estado-${reserva.estado || 'pendiente'}">
-                            ${(reserva.estado || 'pendiente').toUpperCase()}
+                        <span class="reserva-codigo">${reserva.codigoReserva || 'Sin código'}</span>
+                        <span class="reserva-estado estado-${estado}">
+                            ${estado.toUpperCase()}
                         </span>
                     </div>
-                    <small>${new Date(reserva.timestamp).toLocaleString('es-ES')}</small>
+                    <small>${reserva.timestamp ? new Date(reserva.timestamp).toLocaleString('es-ES') : 'Fecha no disponible'}</small>
                 </div>
                 
                 <div class="reserva-info">
                     <div class="reserva-info-item">
                         <span class="reserva-label">Cancha</span>
-                        <span class="reserva-value">${reserva.canchaNombre}</span>
+                        <span class="reserva-value">${reserva.canchaNombre || 'No especificada'}</span>
                     </div>
                     <div class="reserva-info-item">
                         <span class="reserva-label">Fecha</span>
-                        <span class="reserva-value">${this.formatearFechaLegible(reserva.fecha)}</span>
+                        <span class="reserva-value">${reserva.fecha ? this.formatearFechaLegible(reserva.fecha) : 'No especificada'}</span>
                     </div>
                     <div class="reserva-info-item">
                         <span class="reserva-label">Horarios</span>
@@ -1216,32 +1246,32 @@ cargarReservasAdmin(filtroEstado = 'todas', filtroFecha = '') {
                     </div>
                     <div class="reserva-info-item">
                         <span class="reserva-label">Cliente</span>
-                        <span class="reserva-value">${reserva.usuario.nombre}</span>
+                        <span class="reserva-value">${usuario.nombre}</span>
                     </div>
                     <div class="reserva-info-item">
                         <span class="reserva-label">Teléfono</span>
-                        <span class="reserva-value">${reserva.usuario.telefono}</span>
+                        <span class="reserva-value">${usuario.telefono}</span>
                     </div>
                     <div class="reserva-info-item">
                         <span class="reserva-label">Total</span>
-                        <span class="reserva-value">${reserva.total} Bs</span>
+                        <span class="reserva-value">${total} Bs</span>
                     </div>
                 </div>
                 
                 <div class="reserva-actions">
-                    ${reserva.estado !== 'confirmada' ? `
+                    ${estado !== 'confirmada' ? `
                         <button class="btn btn-success btn-sm" onclick="sistema.confirmarReservaAdmin('${reserva.id}')">
                             <i class="fas fa-check"></i> Confirmar
                         </button>
                     ` : ''}
                     
-                    ${reserva.estado !== 'cancelada' ? `
+                    ${estado !== 'cancelada' ? `
                         <button class="btn btn-error btn-sm" onclick="sistema.cancelarReservaAdmin('${reserva.id}')">
                             <i class="fas fa-times"></i> Cancelar
                         </button>
                     ` : ''}
                     
-                    <button class="btn btn-secondary btn-sm" onclick="sistema.llamarCliente('${reserva.usuario.telefono}')">
+                    <button class="btn btn-secondary btn-sm" onclick="sistema.llamarCliente('${usuario.telefono}')">
                         <i class="fas fa-phone"></i> Llamar
                     </button>
                     
