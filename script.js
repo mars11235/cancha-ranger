@@ -478,29 +478,49 @@ class SistemaCanchaRanger {
     }
 
     // ===== CONFIRMACIÓN MEJORADA =====
-    avanzarPasoSimple(paso) {
-        if (paso === 2 && !this.validarPaso1()) {
+   avanzarPasoSimple(paso) {
+    console.log(`🔄 Avanzando al paso ${paso}`, this.reservaActual);
+    
+    // Validación para paso 2
+    if (paso === 2) {
+        if (!this.reservaActual.cancha || !this.reservaActual.fecha) {
             this.mostrarNotificacion('❌ Selecciona cancha y fecha primero', 'error');
             return;
         }
-
-        if (paso === 3 && (!this.validarPaso2() || this.reservaActual.horarios.length === 0)) {
-            this.mostrarNotificacion('❌ Completa tus datos y selecciona al menos un horario', 'error');
+    }
+    
+    // Validación para paso 3
+    if (paso === 3) {
+        if (this.reservaActual.horarios.length === 0) {
+            this.mostrarNotificacion('❌ Selecciona al menos un horario', 'error');
             return;
         }
+        // Para el paso 3, NO validamos datos del cliente todavía
+        // Solo validamos que haya horarios seleccionados
+    }
 
-        document.querySelectorAll('.reserva-paso-simple').forEach(paso => {
-            paso.classList.remove('active');
-        });
+    // Ocultar todos los pasos
+    document.querySelectorAll('.reserva-paso-simple').forEach(pasoElement => {
+        pasoElement.classList.remove('active');
+    });
+    
+    // Mostrar el paso actual
+    const pasoActual = document.getElementById(`pasoSimple${paso}`);
+    if (pasoActual) {
+        pasoActual.classList.add('active');
         
-        document.getElementById(`pasoSimple${paso}`).classList.add('active');
-
+        // Ejecutar acciones específicas del paso
         if (paso === 2) {
             this.inicializarHorariosMultiples();
         } else if (paso === 3) {
             this.actualizarResumenFinal();
         }
+        
+        console.log(`✅ Paso ${paso} activado correctamente`);
+    } else {
+        console.error(`❌ No se encontró el paso ${paso}`);
     }
+}
 
     retrocederPasoSimple(paso) {
         this.avanzarPasoSimple(paso);
@@ -549,69 +569,61 @@ class SistemaCanchaRanger {
 }
 
     actualizarResumenFinal() {
-        const contenedor = document.getElementById('resumenFinal');
-        if (!contenedor) return;
+    const contenedor = document.getElementById('resumenFinal');
+    if (!contenedor) {
+        console.error('❌ No se encontró el contenedor del resumen final');
+        return;
+    }
 
-        const nombre = document.getElementById('nombreSimple').value;
-        const telefono = document.getElementById('telefonoSimple').value;
-        const email = document.getElementById('emailSimple').value;
-        const notas = document.getElementById('notasSimple').value;
-        
-        const horariosAgrupados = this.agruparHorariosConsecutivos();
-        const total = horariosAgrupados.reduce((sum, grupo) => {
-            return sum + (grupo.length * this.reservaActual.cancha.precio);
-        }, 0);
-
-        this.reservaActual.datosCliente = {
-            nombre,
-            telefono,
-            email,
-            notas
-        };
-
-        let horariosHTML = '';
-        horariosAgrupados.forEach(grupo => {
-            const horas = grupo.length;
-            horariosHTML += `
-                <div class="resumen-item">
-                    <strong>Horario:</strong>
-                    <span>${grupo[0]}:00 - ${grupo[grupo.length - 1] + 1}:00 (${horas} hora${horas > 1 ? 's' : ''})</span>
-                </div>
-            `;
-        });
-
+    // Verificar que tengamos los datos necesarios
+    if (!this.reservaActual.cancha || !this.reservaActual.fecha || this.reservaActual.horarios.length === 0) {
         contenedor.innerHTML = `
-            <div class="resumen-item">
-                <strong>Cancha:</strong>
-                <span>${this.reservaActual.cancha.nombre}</span>
-            </div>
-            <div class="resumen-item">
-                <strong>Fecha:</strong>
-                <span>${this.formatearFechaLegible(this.reservaActual.fecha)}</span>
-            </div>
-            ${horariosHTML}
-            <div class="resumen-item">
-                <strong>Cliente:</strong>
-                <span>${nombre}</span>
-            </div>
-            <div class="resumen-item">
-                <strong>Teléfono:</strong>
-                <span>${telefono}</span>
-            </div>
-            ${email ? `<div class="resumen-item">
-                <strong>Email:</strong>
-                <span>${email}</span>
-            </div>` : ''}
-            ${notas ? `<div class="resumen-item">
-                <strong>Notas:</strong>
-                <span>${notas}</span>
-            </div>` : ''}
-            <div class="resumen-item resumen-total">
-                <strong>Total a pagar:</strong>
-                <span>${total} Bs</span>
+            <div class="error-message">
+                <i class="fas fa-exclamation-triangle"></i>
+                Faltan datos necesarios para la reserva
             </div>
         `;
+        return;
     }
+
+    const horariosAgrupados = this.agruparHorariosConsecutivos();
+    const total = horariosAgrupados.reduce((sum, grupo) => {
+        return sum + (grupo.length * this.reservaActual.cancha.precio);
+    }, 0);
+
+    let horariosHTML = '';
+    horariosAgrupados.forEach(grupo => {
+        const horas = grupo.length;
+        horariosHTML += `
+            <div class="resumen-item">
+                <strong>Horario:</strong>
+                <span>${grupo[0]}:00 - ${grupo[grupo.length - 1] + 1}:00 (${horas} hora${horas > 1 ? 's' : ''})</span>
+            </div>
+        `;
+    });
+
+    contenedor.innerHTML = `
+        <div class="resumen-item">
+            <strong>Cancha:</strong>
+            <span>${this.reservaActual.cancha.nombre}</span>
+        </div>
+        <div class="resumen-item">
+            <strong>Fecha:</strong>
+            <span>${this.formatearFechaLegible(this.reservaActual.fecha)}</span>
+        </div>
+        ${horariosHTML}
+        <div class="resumen-item resumen-total">
+            <strong>Total a pagar:</strong>
+            <span>${total} Bs</span>
+        </div>
+        <div class="confirmacion-info">
+            <i class="fas fa-info-circle"></i>
+            Completa tus datos arriba y confirma la reserva
+        </div>
+    `;
+    
+    console.log('✅ Resumen final actualizado');
+}
 
     async confirmarReservaWhatsApp() {
     try {

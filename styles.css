@@ -2102,3 +2102,71 @@ textarea:focus-visible {
     outline: 2px solid var(--primary-color);
     outline-offset: 2px;
  }
+
+ /* Estilos para el formulario de datos */
+.datos-cliente-simple {
+    margin-bottom: 2rem;
+}
+
+.datos-cliente-simple h3 {
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.datos-cliente-simple p {
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+}
+
+.formulario-simple {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.input-grupo label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.input-grupo input,
+.input-grupo textarea {
+    width: 100%;
+    padding: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-sm);
+    background: var(--secondary-color);
+    color: var(--text-primary);
+    font-size: 1rem;
+    transition: var(--transition);
+    font-family: inherit;
+}
+
+.input-grupo input:focus,
+.input-grupo textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(139, 0, 0, 0.1);
+}
+
+.input-grupo textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.error-message {
+    background: var(--error-color);
+    color: white;
+    padding: 1rem;
+    border-radius: var(--border-radius-sm);
+    text-align: center;
+    margin: 1rem 0;
+}
